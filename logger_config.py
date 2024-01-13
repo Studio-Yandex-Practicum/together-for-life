@@ -2,6 +2,8 @@ import logging
 import sys
 from logging.handlers import RotatingFileHandler
 
+from constants import BACKUP_COUNT, ENCODING, LOG_FILE_FOLDER, MAX_BYTES
+
 
 def init_globals_logging():
     """Инициализация глобальных натсроек логера."""
@@ -9,7 +11,7 @@ def init_globals_logging():
         format='%(asctime)s - %(levelname)s - %(message)s - %(name)s',
         handlers=[
             logging.StreamHandler(sys.stdout),
-            RotatingFileHandler('logs/logfile.log', encoding='cp1251',
-                                maxBytes=50000000, backupCount=5)
+            RotatingFileHandler(LOG_FILE_FOLDER, encoding=ENCODING,
+                                maxBytes=MAX_BYTES, backupCount=BACKUP_COUNT)
         ]
     )
