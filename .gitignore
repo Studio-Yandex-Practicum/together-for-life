@@ -129,8 +129,3 @@ dmypy.json
 .pyre/
 
 .vscode
-
-MY_README.md
-test1.py
-test2.py
-test3.py
