@@ -21,3 +21,8 @@ repos:
    rev: 7.0.0
    hooks:
    -  id: flake8
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.1.13
+  hooks:
+    - id: ruff
+    - id: ruff-format
