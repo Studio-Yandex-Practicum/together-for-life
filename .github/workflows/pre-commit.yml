@@ -1,0 +1,22 @@
+name: pre-commit workflow
+
+on: 
+  pull_request:
+    types: [opened, reopened]
+    branches: [main, develop]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Setup and run pre-commit checks
+      uses: pre-commit/action@v3.0.0
+      with:
+        extra_args: --all-files --verbose
+    - name: Print git diff after changes from pre-commit
+      run: git diff
