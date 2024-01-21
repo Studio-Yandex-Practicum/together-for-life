@@ -3,6 +3,8 @@ from vk_api.longpoll import VkEventType, VkLongPoll
 
 
 class VKBot:
+    """Класс ВК чат-бота."""
+
     def __init__(self, token):
         self.vk_session = vk_api.VkApi(token=token)
 
