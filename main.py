@@ -1,6 +1,6 @@
-import os
-
 import logging
+
+import os
 
 from dotenv import load_dotenv
 
@@ -13,11 +13,11 @@ load_dotenv()
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(logging.DEBUG)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_globals_logging()
     try:
-        logger.debug(f'Запуск Бота - {LOGGER_NAME}')
-        bot_vk_chat = VKBot(os.getenv('TOKEN'))
+        logger.debug(f"Запуск Бота - {LOGGER_NAME}")
+        bot_vk_chat = VKBot(os.getenv("TOKEN"))
         bot_vk_chat.vkbot_up()
     except Exception as error:
-        logger.error(f'Ошибка бота {LOGGER_NAME}: {error}')
+        logger.error(f"Ошибка бота {LOGGER_NAME}: {error}")

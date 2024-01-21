@@ -6,12 +6,17 @@ class VKBot:
     def __init__(self, token):
         self.vk_session = vk_api.VkApi(token=token)
 
-    def vkbot_up(self,):
+    def vkbot_up(
+        self,
+    ):
         for event in VkLongPoll(self.vk_session).listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                self.vk_session.method("messages.send", dict(
-                    user_id=event.user_id,
-                    message=event.text,
-                    keyboard=None,
-                    random_id=0
-                ))
+                self.vk_session.method(
+                    "messages.send",
+                    dict(
+                        user_id=event.user_id,
+                        message=event.text,
+                        keyboard=None,
+                        random_id=0,
+                    ),
+                )
