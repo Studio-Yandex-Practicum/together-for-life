@@ -1,6 +1,4 @@
 import logging
-
-
 import os
 
 from dotenv import load_dotenv
@@ -18,7 +16,7 @@ if __name__ == "__main__":
     init_globals_logging()
     try:
         logger.debug(f"Запуск Бота - {LOGGER_NAME}")
-        bot_vk_chat = VKBot(os.getenv("TOKEN"))
+        bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
         bot_vk_chat.vkbot_up()
     except Exception as error:
         logger.error(f"Ошибка бота {LOGGER_NAME}: {error}")

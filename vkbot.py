@@ -15,7 +15,7 @@ class VKBot:
                     "messages.send",
                     dict(
                         user_id=event.user_id,
-                        message=event.text,
+                        message=f"Поступило сообщение: {event.text}.",
                         keyboard=None,
                         random_id=0,
                     ),
