@@ -1,6 +1,8 @@
 import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
 
+from constants import ECHO_MESSAGE, RANDOM_ID
+
 
 class VKBot:
     """Класс ВК чат-бота."""
@@ -17,8 +19,8 @@ class VKBot:
                     "messages.send",
                     dict(
                         user_id=event.user_id,
-                        message=f"Поступило сообщение: {event.text}.",
+                        message=ECHO_MESSAGE.format(event.text),
                         keyboard=None,
-                        random_id=0,
+                        random_id=RANDOM_ID,
                     ),
                 )

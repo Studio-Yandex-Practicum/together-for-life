@@ -6,3 +6,7 @@ FORMAT = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 LOGS_FOLDER = "logs/logfile.log"
 LOGGER_NAME = "vk-bot"
 MAX_BYTES = 50000000
+
+# Константы ВК чат-бота
+ECHO_MESSAGE = "Поступило сообщение: {}."
+RANDOM_ID = 0
