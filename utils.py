@@ -1,10 +1,12 @@
 import csv
 
-from constants import PATH_TO_DATA
+from constants import PATH_TO_DATA, FILE_NAME
 
+
+filename = PATH_TO_DATA / FILE_NAME
 
 def get_menu_dict():
-    with open((PATH_TO_DATA), mode='r') as file:
+    with open((filename), mode='r') as file:
         reader = csv.reader(file)
         header = next(reader)
         menu_dict = {}
