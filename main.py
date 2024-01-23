@@ -1,3 +1,4 @@
+"""Модуль запуска бота."""
 import logging
 import os
 import time
@@ -15,12 +16,18 @@ logger.setLevel(logging.DEBUG)
 
 bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
 
-if __name__ == "__main__":
-    init_globals_logging()
+
+def main():
+    """Функция работы бота."""
     while True:
+        logger.debug("Запуск Бота.")
         try:
-            logger.debug("Запуск Бота.")
             bot_vk_chat.vkbot_up()
         except Exception as error:
             logger.error(f"Ошибка бота : {error}")
             time.sleep(RELOAD_TIME)
+
+
+if __name__ == "__main__":
+    init_globals_logging()
+    main()
