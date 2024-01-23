@@ -1,7 +1,6 @@
 import csv
 
-
-PATH_TO_DATA= 'data/menu.csv'
+from constants import PATH_TO_DATA
 
 
 def get_menu_dict():
