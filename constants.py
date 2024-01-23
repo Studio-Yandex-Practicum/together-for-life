@@ -6,5 +6,7 @@ FORMAT = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 LOGS_FOLDER = "logs/logfile.log"
 LOGGER_NAME = "vk-bot"
 MAX_BYTES = 50000000
+
+# Константы утилиты чтения/записи csv-файла
 PATH_TO_DATA = "data"
 FILE_NAME = "menu.csv"
