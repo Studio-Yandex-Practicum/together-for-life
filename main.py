@@ -19,8 +19,8 @@ if __name__ == "__main__":
     init_globals_logging()
     while True:
         try:
-            logger.debug(f"Запуск Бота - {LOGGER_NAME}")
+            logger.debug("Запуск Бота.")
             bot_vk_chat.vkbot_up()
         except Exception as error:
-            logger.error(f"Ошибка бота {LOGGER_NAME}: {error}")
+            logger.error(f"Ошибка бота : {error}")
             time.sleep(RELOAD_TIME)
