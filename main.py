@@ -1,4 +1,5 @@
 """Модуль запуска бота."""
+
 import logging
 import os
 import time
@@ -24,7 +25,7 @@ def main():
         try:
             bot_vk_chat.vkbot_up()
         except Exception as error:
-            logger.error(f"Ошибка бота : {error}")
+            logger.error(f"Ошибка бота: {error}")
             time.sleep(RELOAD_TIME)
 
 
