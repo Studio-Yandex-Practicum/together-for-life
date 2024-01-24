@@ -1,3 +1,4 @@
+"""Модуль класса реализации чтения и записи файла csv."""
 import csv
 from pathlib import Path
 
@@ -12,7 +13,7 @@ class DataManager:
     """Класс формирования меню кнопок и их сообщений"""
 
     def __init__(self):
-        """Чтение данных из csv-файла в словарь"""
+        """Чтение данных из csv-файла в список словарей"""
         data = []
         with open(filename, "r") as file:
             reader = csv.DictReader(file)
@@ -34,7 +35,7 @@ class DataManager:
                 return row["Информация"]
 
     def write_file(self):
-        """Перезапись csv-файла"""
+        """Метод перезаписи csv-файла"""
         with open(filename, "w", newline="", encoding="utf-8") as csvfile:
             fieldnames = ["Заголовок(меню)", "Информация"]
             writer = csv.writer(csvfile)
