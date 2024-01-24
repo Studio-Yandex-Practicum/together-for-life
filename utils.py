@@ -50,11 +50,11 @@ class DataManager:
         for row in self._menu:
             if row["Заголовок(меню)"] == label:
                 row["Информация"] = new_message
-            self.write_file()
+        self.write_file()
 
     def edit_label(self, label: str, new_label: str):
         """Изменение названия/лейбла для выбранной кнопки"""
         for row in self._menu:
             if row["Заголовок(меню)"] == label:
                 row["Заголовок(меню)"] = new_label
-            self.write_file()
+        self.write_file()
