@@ -21,18 +21,26 @@ class VKBot:
     ):
         """Метод запуска бота."""
         for event in VkLongPoll(self.__vk_session).listen():
-            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                logger.debug(f"Получено сообщение: {event.text}.")
-                self.__vk_session.method(
-                    "messages.send",
-                    dict(
-                        user_id=event.user_id,
-                        message=ECHO_MESSAGE_TEMPLATE.format(event.text),
-                        keyboard=None,
-                        random_id=CHECKING_UNIQUE,
-                    ),
-                )
-                logger.debug(
-                    "Отправлено сообщение: "
-                    f"{ECHO_MESSAGE_TEMPLATE.format(event.text)}."
-                )
+            if event.type == VkEventType.MESSAGE_NEW:
+                self.__message_handler(event)
+
+    def __message_handler(self, event):
+        """Метод разбора события новое сообщение."""
+        if event.to_me:
+            self.__send_message(event)
+
+    def __send_message(self, event):
+        """Метод отправки сообщений."""
+        logger.debug(f"Получено сообщение: {event.text}.")
+        self.__vk_session.method(
+            "messages.send",
+            dict(
+                user_id=event.user_id,
+                message=ECHO_MESSAGE_TEMPLATE.format(event.text),
+                keyboard=None,
+                random_id=CHECKING_UNIQUE,
+            ),
+        )
+        logger.debug(
+            f"Отправлено сообщение: {ECHO_MESSAGE_TEMPLATE.format(event.text)}"
+        )
