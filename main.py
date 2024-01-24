@@ -23,7 +23,7 @@ def main():
             bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
             bot_vk_chat.vkbot_up()
         except Exception as error:
-            logger.error(f"Ошибка бота: {error}")
+            logger.error(f"Ошибка бота: {error}.")
             time.sleep(RELOAD_TIME)
 
 

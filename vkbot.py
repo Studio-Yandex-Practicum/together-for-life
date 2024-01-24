@@ -22,7 +22,7 @@ class VKBot:
         """Метод запуска бота."""
         for event in VkLongPoll(self.__vk_session).listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                logger.debug(f"Получено сообщение: {event.text}")
+                logger.debug(f"Получено сообщение: {event.text}.")
                 self.__vk_session.method(
                     "messages.send",
                     dict(
@@ -34,5 +34,5 @@ class VKBot:
                 )
                 logger.debug(
                     "Отправлено сообщение: "
-                    f"{ECHO_MESSAGE_TEMPLATE.format(event.text)}"
+                    f"{ECHO_MESSAGE_TEMPLATE.format(event.text)}."
                 )

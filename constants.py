@@ -6,7 +6,6 @@ FORMAT = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 LOGGING_LEVEL = "DEBUG"
 LOGS_FOLDER = "logs"
 LOGS_FILE = "logfile.log"
-LOGGER_NAME = "vk-bot"
 MAX_BYTES = 50_000_000
 
 # Константы ВК чат-бота
