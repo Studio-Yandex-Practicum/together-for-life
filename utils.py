@@ -16,11 +16,11 @@ class DataManager:
         data = []
         with open(filename, "r") as file:
             reader = csv.DictReader(file)
-            for i in reader:
-                data.append(i)
+            for row in reader:
+                data.append(row)
         self._menu = data
 
-    def get_menu_labels(self):
+    def get_menu_labels(self) -> list[str]:
         """Возвращает список лейблов для всех кнопок"""
         labels_list = []
         for row in self._menu:
@@ -44,14 +44,14 @@ class DataManager:
                 new_menu_list.append(row.values())
             writer.writerows(new_menu_list)
 
-    def edit_message(self, label, new_message):
+    def edit_message(self, label: str, new_message: str):
         """Изменение сообщения/информации для выбранной кнопки"""
         for row in self._menu:
             if row["Заголовок(меню)"] == label:
                 row["Информация"] = new_message
             self.write_file()
 
-    def edit_label(self, label, new_label):
+    def edit_label(self, label: str, new_label: str):
         """Изменение названия/лейбла для выбранной кнопки"""
         for row in self._menu:
             if row["Заголовок(меню)"] == label:
