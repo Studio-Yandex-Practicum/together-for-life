@@ -13,35 +13,45 @@ class DataManager():
 
     def __init__(self):
         """Чтение данных из csv-файла в словарь"""
-        with open((filename), mode='r') as file:
-            reader = csv.reader(file)
-            header = next(reader)
-            menu_dict = {}
-            for row in reader:
-                menu_dict[row[0]] = row[1]
-        self._menu = menu_dict
-
-    def edit_menu(self, new_menu_list):
-        """Перезапись данных в csv-файле"""
-        with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ["Заголовок(меню)", "Информация"]
-            writer = csv.writer(csvfile)
-            writer.writerow(fieldnames)
-            writer.writerows(new_menu_list)
+        data = []
+        with open(filename, 'r') as file:
+            reader = csv.DictReader(file)
+            for i in reader:
+                data.append(i)
+        self._menu = data
 
     def get_menu_labels(self):
         """Возвращает список лейблов для всех кнопок"""
-        return list(self._menu)
+        labels_list = []
+        for row in self._menu:
+            labels_list.append(row["Заголовок(меню)"])
+        return labels_list
 
-    def get_message(self, button_name: str):
+    def get_message(self, label: str):
         """Возвращает сообщение для заданной кнопки по лейблу"""
-        message = ""
-        for name in self._menu:
-            if button_name == name:
-                message = self._menu[name]
-                return message
+        for row in self._menu:
+            if row["Заголовок(меню)"] == label:
+                return row["Информация"]
+
+    def write_file(self):
+        """Перезапись csv-файла"""
+        with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+            csvfile.write("Заголовок(меню),Информация\n")
+            for row in self._menu:
+                label = row["Заголовок(меню)"]
+                message = row["Информация"]
+                csvfile.write(f'{label},{message}\n')
 
     def edit_message(self, label, new_message):
-        self._menu[label] = new_message
-        new_menu_list = list(self._menu.items())
-        self.edit_menu(new_menu_list)
+        """Изменение сообщения/информации для выбранной кнопки"""
+        for row in self._menu:
+            if row["Заголовок(меню)"] == label:
+                row["Информация"] = f"{new_message}"
+            self.write_file()
+
+    def edit_label(self, label, new_label):
+        """Изменение названия/лейбла для выбранной кнопки"""
+        for row in self._menu:
+            if row["Заголовок(меню)"] == label:
+                row["Заголовок(меню)"] = new_label
+            self.write_file()
