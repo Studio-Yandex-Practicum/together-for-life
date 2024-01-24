@@ -14,14 +14,13 @@ load_dotenv()
 
 logger = logging.getLogger(LOGGER_NAME)
 
-bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
-
 
 def main():
     """Функция работы бота."""
     while True:
         logger.debug("Запуск Бота.")
         try:
+            bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
             bot_vk_chat.vkbot_up()
         except Exception as error:
             logger.error(f"Ошибка бота: {error}")
