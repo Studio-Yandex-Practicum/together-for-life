@@ -16,9 +16,7 @@ class VKBot:
         """Метод инициализации."""
         self.__vk_session = vk_api.VkApi(token=vk_token)
 
-    def vkbot_up(
-        self,
-    ):
+    def vkbot_up(self):
         """Метод запуска бота."""
         for event in VkLongPoll(self.__vk_session).listen():
             if event.type == VkEventType.MESSAGE_NEW:
