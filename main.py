@@ -6,13 +6,13 @@ import time
 
 from dotenv import load_dotenv
 
-from constants import LOGGER_NAME, RELOAD_TIME
+from constants import RELOAD_TIME
 from logger_config import init_globals_logging
 from vkbot import VKBot
 
 load_dotenv()
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def main():
