@@ -8,13 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent
 filename = BASE_DIR / PATH_TO_DATA / FILE_NAME
 
 
-class DataManager():
+class DataManager:
     """Класс формирования меню кнопок и их сообщений"""
 
     def __init__(self):
         """Чтение данных из csv-файла в словарь"""
         data = []
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             reader = csv.DictReader(file)
             for i in reader:
                 data.append(i)
@@ -35,12 +35,12 @@ class DataManager():
 
     def write_file(self):
         """Перезапись csv-файла"""
-        with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(filename, "w", newline="", encoding="utf-8") as csvfile:
             csvfile.write("Заголовок(меню),Информация\n")
             for row in self._menu:
                 label = row["Заголовок(меню)"]
                 message = row["Информация"]
-                csvfile.write(f'{label},{message}\n')
+                csvfile.write(f"{label},{message}\n")
 
     def edit_message(self, label, new_message):
         """Изменение сообщения/информации для выбранной кнопки"""
