@@ -4,7 +4,7 @@ services:
   vk-bot:
     build: .
     env_file:
-      - ./data/.env
+      - ./.env
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -12,3 +12,4 @@ services:
       - 80:80
       - 443:443
     restart: always
+    command: python3 /app/main.py
