@@ -2,8 +2,8 @@ name: pre-commit workflow
 
 on: 
   pull_request:
-    types: [opened, reopened]
-    branches: [main, develop]
+    types: [opened, reopened, synchronize]
+    branches: [master, develop]
 
 jobs:
   pre-commit:
