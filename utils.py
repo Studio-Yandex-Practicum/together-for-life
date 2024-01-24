@@ -36,17 +36,19 @@ class DataManager:
     def write_file(self):
         """Перезапись csv-файла"""
         with open(filename, "w", newline="", encoding="utf-8") as csvfile:
-            csvfile.write("Заголовок(меню),Информация\n")
+            fieldnames = ["Заголовок(меню)", "Информация"]
+            writer = csv.writer(csvfile)
+            writer.writerow(fieldnames)
+            new_menu_list = []
             for row in self._menu:
-                label = row["Заголовок(меню)"]
-                message = row["Информация"]
-                csvfile.write(f"{label},{message}\n")
+                new_menu_list.append(row.values())
+            writer.writerows(new_menu_list)
 
     def edit_message(self, label, new_message):
         """Изменение сообщения/информации для выбранной кнопки"""
         for row in self._menu:
             if row["Заголовок(меню)"] == label:
-                row["Информация"] = f"{new_message}"
+                row["Информация"] = new_message
             self.write_file()
 
     def edit_label(self, label, new_label):
