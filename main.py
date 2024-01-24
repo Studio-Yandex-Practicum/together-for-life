@@ -13,7 +13,7 @@ from vkbot import VKBot
 load_dotenv()
 
 logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
 

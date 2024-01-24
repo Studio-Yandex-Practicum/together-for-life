@@ -3,7 +3,7 @@
 import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
 
-from constants import ECHO_MESSAGE, RANDOM_ID
+from constants import ECHO_MESSAGE_TEMPLATE, CHECKING_UNIQUE
 
 
 class VKBot:
@@ -11,21 +11,20 @@ class VKBot:
 
     def __init__(self, vk_token):
         """Метод инициализации."""
-        self.__vk_token = vk_token
+        self.__vk_session = vk_api.VkApi(token=vk_token)
 
     def vkbot_up(
         self,
     ):
         """Метод запуска бота."""
-        vk_session = vk_api.VkApi(token=self.__vk_token)
-        for event in VkLongPoll(vk_session).listen():
+        for event in VkLongPoll(self.__vk_session).listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                vk_session.method(
+                self.__vk_session.method(
                     "messages.send",
                     dict(
                         user_id=event.user_id,
-                        message=ECHO_MESSAGE.format(event.text),
+                        message=ECHO_MESSAGE_TEMPLATE.format(event.text),
                         keyboard=None,
-                        random_id=RANDOM_ID,
+                        random_id=CHECKING_UNIQUE,
                     ),
                 )
