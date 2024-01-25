@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Функция работы бота."""
+    bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
     while True:
         logger.debug("Запуск Бота.")
         try:
-            bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
             bot_vk_chat.vkbot_up()
         except ApiError as error:
-            logger.error(f"Ошибка токена бота: {error}.")
+            logger.critical(f"Ошибка токена бота: {error}.")
             break
         except Exception as error:
             logger.error(f"Ошибка бота: {error}.")
