@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  vk-bot:
+    build: .
+    env_file:
+      - ./.env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: always
+    command: python3 /app/main.py
