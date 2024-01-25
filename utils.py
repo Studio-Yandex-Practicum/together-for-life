@@ -1,4 +1,5 @@
 """Модуль класса реализации чтения и записи файла csv."""
+
 import csv
 from pathlib import Path
 
@@ -19,25 +20,31 @@ class MenuManager:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 data.append(row)
+        self.__key_label = reader.fieldnames[0]
+        self.__key_message = reader.fieldnames[1]
         self.__menu = data
 
     def get_menu_labels(self) -> list[str]:
         """Возвращает список лейблов для всех кнопок"""
         labels_list = []
         for row in self.__menu:
-            labels_list.append(row["Заголовок(меню)"])
+            labels_list.append(row[self.__key_label])
         return labels_list
 
-    def get_message(self, label: str):
-        """Возвращает сообщение для заданной кнопки по лейблу"""
+    def get_message(self, label: str) -> str | None:
+        """
+        Возвращает сообщение для заданной кнопки по лейблу.
+        Если кнопки нет в меню, возвращает None.
+        """
         for row in self.__menu:
-            if row["Заголовок(меню)"] == label:
-                return row["Информация"]
+            if row.get(self.__key_label, None) == label:
+                return row.get(self.__key_message, None)
+        return None
 
     def __write_file(self):
         """Метод перезаписи csv-файла"""
         with open(filename, "w", newline="", encoding=ENCODING) as csvfile:
-            fieldnames = ["Заголовок(меню)", "Информация"]
+            fieldnames = [self.__key_label, self.__key_message]
             writer = csv.writer(csvfile)
             writer.writerow(fieldnames)
             new_menu_list = []
@@ -48,13 +55,13 @@ class MenuManager:
     def edit_message(self, label: str, new_message: str):
         """Изменение сообщения/информации для выбранной кнопки"""
         for row in self.__menu:
-            if row["Заголовок(меню)"] == label:
-                row["Информация"] = new_message
+            if row[self.__key_label] == label:
+                row[self.__key_message] = new_message
         self.__write_file()
 
     def edit_label(self, label: str, new_label: str):
         """Изменение названия/лейбла для выбранной кнопки"""
         for row in self.__menu:
-            if row["Заголовок(меню)"] == label:
-                row["Заголовок(меню)"] = new_label
+            if row[self.__key_label] == label:
+                row[self.__key_label] = new_label
         self.__write_file()
