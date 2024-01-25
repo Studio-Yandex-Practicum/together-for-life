@@ -16,20 +16,12 @@ from constants import (
     MAX_BYTES,
 )
 
-LOGGING_LEVEL_DICT = dict(
-    DEBUG=logging.DEBUG,
-    INFO=logging.INFO,
-    WARNING=logging.WARNING,
-    ERROR=logging.ERROR,
-    CRITICAL=logging.CRITICAL,
-)
-
 
 def init_globals_logging():
     """Инициализация глобальных натсроек логера."""
     os.makedirs(LOGS_FOLDER, exist_ok=True)
     logging.basicConfig(
-        level=LOGGING_LEVEL_DICT.get(LOGGING_LEVEL),
+        level=getattr(logging, LOGGING_LEVEL, "DEBUG"),
         format=FORMAT,
         datefmt=DATE_FORMAT,
         handlers=[
