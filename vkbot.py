@@ -24,22 +24,22 @@ class VKBot:
 
     def __message_handler(self, event):
         """Метод разбора события новое сообщение."""
-        logger.debug(f"Получено сообщение: {event.text}.")
+        logger.debug(
+            f"От пользователя {event.user_id} получено сообщение: {event.text}"
+        )
         if event.to_me:
-            self.__send_message(event.user_id, event.text)
+            message = ECHO_MESSAGE_TEMPLATE.format(event.text)
+            self.__send_message(event.user_id, message)
 
-    def __send_message(self, user_id, message_text):
+    def __send_message(self, user_id, message):
         """Метод отправки сообщений."""
         self.__vk_session.method(
             "messages.send",
             dict(
                 user_id=user_id,
-                message=ECHO_MESSAGE_TEMPLATE.format(message_text),
+                message=message,
                 keyboard=None,
                 random_id=CHECKING_UNIQUE,
             ),
         )
-        logger.debug(
-            "Бот отправил сообщение пользователю в чате: "
-            f"{ECHO_MESSAGE_TEMPLATE.format(message_text)}."
-        )
+        logger.debug(f"Пользователю {user_id} отправлено сообщение: {message}")
