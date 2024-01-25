@@ -9,4 +9,4 @@ MAX_BYTES = 50000000
 
 # Константы утилиты чтения/записи csv-файла
 PATH_TO_DATA = "data"
-FILE_NAME = "menu.csv"
+MENU_FILE_NAME = "menu.csv"

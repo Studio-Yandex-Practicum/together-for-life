@@ -2,21 +2,21 @@
 import csv
 from pathlib import Path
 
-from constants import FILE_NAME, PATH_TO_DATA
+from constants import ENCODING, MENU_FILE_NAME, PATH_TO_DATA
 
 
 BASE_DIR = Path(__file__).resolve().parent
-filename = BASE_DIR / PATH_TO_DATA / FILE_NAME
+filename = BASE_DIR / PATH_TO_DATA / MENU_FILE_NAME
 
 
-class DataManager:
+class MenuManager:
     """Класс формирования меню кнопок и их сообщений"""
 
     def __init__(self):
         """Чтение данных из csv-файла в список словарей"""
         data = []
-        with open(filename, "r") as file:
-            reader = csv.DictReader(file)
+        with open(filename, "r", newline="", encoding=ENCODING) as csvfile:
+            reader = csv.DictReader(csvfile)
             for row in reader:
                 data.append(row)
         self.__menu = data
@@ -36,7 +36,7 @@ class DataManager:
 
     def __write_file(self):
         """Метод перезаписи csv-файла"""
-        with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+        with open(filename, "w", newline="", encoding=ENCODING) as csvfile:
             fieldnames = ["Заголовок(меню)", "Информация"]
             writer = csv.writer(csvfile)
             writer.writerow(fieldnames)
