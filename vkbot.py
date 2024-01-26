@@ -31,15 +31,23 @@ class VKBot:
         message = ECHO_MESSAGE_TEMPLATE.format(event.text)
         self.__send_message(event.user_id, message)
 
-    def __send_message(self, user_id, message):
+    def __send_message(self, user_id, message_text):
         """Метод отправки сообщений."""
-        self.__vk_session.method(
-            "messages.send",
-            dict(
-                user_id=user_id,
-                message=message,
-                keyboard=None,
-                random_id=CHECKING_UNIQUE,
-            ),
-        )
-        logger.debug(f"Пользователю {user_id} отправлено сообщение: {message}")
+        try:
+            self.__vk_session.method(
+                "messages.send",
+                dict(
+                    user_id=user_id,
+                    message=message_text,
+                    keyboard=None,
+                    random_id=CHECKING_UNIQUE,
+                ),
+            )
+            logger.debug(
+                f"Пользователю {user_id}, отправлено сообщение: {message_text}"
+            )
+        except Exception as error:
+            logger.error(
+                f"При отправке пользователю {user_id} сообщения: "
+                f"{message_text}. Произошла ошибка: {error}."
+            )
