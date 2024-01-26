@@ -8,5 +8,5 @@ LOGGER_NAME = "vk-bot"
 MAX_BYTES = 50000000
 
 # Константы утилиты чтения/записи csv-файла
-PATH_TO_DATA = "data"
+MENU_FOLDER = "data"
 MENU_FILE_NAME = "menu.csv"

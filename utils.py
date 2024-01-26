@@ -1,15 +1,16 @@
 """Модуль класса реализации чтения и записи файла csv."""
 
 import csv
+import os
 import sys
 import logging
 from pathlib import Path
 
-from constants import ENCODING, MENU_FILE_NAME, PATH_TO_DATA
+from constants import ENCODING, MENU_FILE_NAME, MENU_FOLDER
 
 
 BASE_DIR = Path(__file__).resolve().parent
-filename = BASE_DIR / PATH_TO_DATA / MENU_FILE_NAME
+filename = BASE_DIR / MENU_FOLDER / MENU_FILE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class MenuManager:
     def __init__(self):
         """Чтение данных из csv-файла в список словарей"""
         data = []
+        os.makedirs(MENU_FOLDER, exist_ok=True)
         try:
             with open(filename, "r", newline="", encoding=ENCODING) as csvfile:
                 reader = csv.DictReader(csvfile)
@@ -51,6 +53,7 @@ class MenuManager:
 
     def __write_file(self):
         """Метод перезаписи csv-файла"""
+        os.makedirs(MENU_FOLDER, exist_ok=True)
         try:
             with open(filename, "w", newline="", encoding=ENCODING) as csvfile:
                 fieldnames = [self.__key_label, self.__key_message]
