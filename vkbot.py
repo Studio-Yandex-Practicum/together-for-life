@@ -18,8 +18,9 @@ class VKBot:
 
     def vkbot_up(self):
         """Метод запуска бота."""
+        logger.debug("Запуск Бота.")
         for event in VkLongPoll(self.__vk_session).listen():
-            if event.type == VkEventType.MESSAGE_NEW:
+            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 self.__message_handler(event)
 
     def __message_handler(self, event):
@@ -27,9 +28,8 @@ class VKBot:
         logger.debug(
             f"От пользователя {event.user_id} получено сообщение: {event.text}"
         )
-        if event.to_me:
-            message = ECHO_MESSAGE_TEMPLATE.format(event.text)
-            self.__send_message(event.user_id, message)
+        message = ECHO_MESSAGE_TEMPLATE.format(event.text)
+        self.__send_message(event.user_id, message)
 
     def __send_message(self, user_id, message):
         """Метод отправки сообщений."""

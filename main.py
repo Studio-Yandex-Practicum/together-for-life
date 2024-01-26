@@ -20,7 +20,6 @@ def main():
     """Функция работы бота."""
     bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
     while True:
-        logger.debug("Запуск Бота.")
         try:
             bot_vk_chat.vkbot_up()
         except ApiError as error:
