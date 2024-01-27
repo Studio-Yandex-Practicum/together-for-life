@@ -1,9 +1,9 @@
 """Модуль класса реализации чтения и записи файла csv."""
 
 import csv
+import logging
 import os
 import sys
-import logging
 from pathlib import Path
 
 from constants import ENCODING, MENU_FILE_NAME, MENU_FOLDER
@@ -50,6 +50,23 @@ class MenuManager:
             if row.get(self.__key_label, None) == label:
                 return row.get(self.__key_message, None)
         return None
+
+    def get_message_by_index(self, label: str) -> str | None:
+        """
+        Возвращает сообщение для заданной кнопки по индексу.
+        Если кнопки нет в меню, возвращает None.
+        """
+        for row in self.__menu:
+            if label.isdigit() and self.__menu.index(row) == int(label):
+                return row.get(self.__key_message, None)
+        return None
+
+    def get_preview_menu_labels(self) -> str:
+        """Возвращает строку с описанием меню для кнопок"""
+        preview_message = ""
+        for label in self.get_menu_labels()[1::]:
+            preview_message += f"{self.get_menu_labels().index(label)}. {label}\n"
+        return preview_message
 
     def __write_file(self):
         """Метод перезаписи csv-файла"""
