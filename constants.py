@@ -8,6 +8,10 @@ LOGS_FOLDER = "logs"
 LOGS_FILE = "logfile.log"
 MAX_BYTES = 50_000_000
 
+# Константы утилиты чтения/записи csv-файла
+MENU_FOLDER = "data"
+MENU_FILE_NAME = "menu.csv"
+
 # Константы ВК чат-бота
 ECHO_MESSAGE_TEMPLATE = "Поступило сообщение: {}."
 CHECKING_UNIQUE = 0
