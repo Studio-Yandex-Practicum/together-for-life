@@ -63,10 +63,10 @@ class MenuManager:
 
     def get_preview_menu_labels(self) -> str:
         """Возвращает строку с описанием меню для кнопок"""
-        preview_message = ""
+        preview = ""
         for label in self.get_menu_labels()[1::]:
-            preview_message += f"{self.get_menu_labels().index(label)}. {label}\n"
-        return preview_message
+            preview += f"{self.get_menu_labels().index(label)}. {label}\n"
+        return preview
 
     def __write_file(self):
         """Метод перезаписи csv-файла"""
