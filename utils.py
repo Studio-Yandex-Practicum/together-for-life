@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 from constants import ENCODING, MENU_FILE_NAME, MENU_FOLDER
 
@@ -41,7 +42,7 @@ class MenuManager:
             labels_list.append(row[self.__key_label])
         return labels_list
 
-    def get_message(self, label: str) -> str | None:
+    def get_message(self, label: str) -> Optional[str]:
         """
         Возвращает сообщение для заданной кнопки по лейблу.
         Если кнопки нет в меню, возвращает None.
@@ -51,7 +52,7 @@ class MenuManager:
                 return row.get(self.__key_message, None)
         return None
 
-    def get_message_by_index(self, label: str) -> str | None:
+    def get_message_by_index(self, label: str) -> Optional[str]:
         """
         Возвращает сообщение для заданной кнопки по индексу.
         Если кнопки нет в меню, возвращает None.

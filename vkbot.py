@@ -4,7 +4,8 @@ import logging
 import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
 
-from constants import ECHO_MESSAGE_TEMPLATE, CHECKING_UNIQUE
+from answers import cmd_answ
+from constants import CHECKING_UNIQUE
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +26,24 @@ class VKBot:
 
     def __message_handler(self, event):
         """Метод разбора события новое сообщение."""
-        logger.debug(
-            f"От пользователя {event.user_id} получено сообщение: {event.text}"
-        )
-        message = ECHO_MESSAGE_TEMPLATE.format(event.text)
-        self.__send_message(event.user_id, message)
+        user_id, text = event.user_id, event.text
+        logger.debug(f"От пользователя {user_id} получено сообщение: {text}")
+        if cmd_answ.get(text) is not None:
+            message, keyboard = cmd_answ.get(text)
+            self.__send_message(user_id, message, keyboard)
+        elif self.__check_for_service_event(event):
+            pass
+        else:
+            message, keyboard = cmd_answ.get("Начать")
+            self.__send_message(user_id, message, keyboard)
 
-    def __send_message(self, user_id, message_text):
+        # message = ECHO_MESSAGE_TEMPLATE.format(text)
+        # self.__send_message(user_id, message)
+
+    def __check_for_service_event(self, event):
+        return False
+
+    def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
         try:
             self.__vk_session.method(
@@ -39,7 +51,7 @@ class VKBot:
                 dict(
                     user_id=user_id,
                     message=message_text,
-                    keyboard=None,
+                    keyboard=keyboard,
                     random_id=CHECKING_UNIQUE,
                 ),
             )
