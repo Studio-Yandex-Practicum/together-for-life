@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 from constants import ENCODING, MENU_FILE_NAME, MENU_FOLDER
 
@@ -27,8 +28,8 @@ class MenuManager:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     data.append(row)
-            self.__key_label = reader.fieldnames[0]
-            self.__key_message = reader.fieldnames[1]
+            self.key_label = reader.fieldnames[0]
+            self.key_message = reader.fieldnames[1]
             self.__menu = data
         except IOError as error:
             logger.error(f"Ошибка чтения файла: {error}.")
@@ -38,27 +39,27 @@ class MenuManager:
         """Возвращает список лейблов для всех кнопок"""
         labels_list = []
         for row in self.__menu:
-            labels_list.append(row[self.__key_label])
+            labels_list.append(row[self.key_label])
         return labels_list
 
-    def get_message(self, label: str) -> str | None:
+    def get_message(self, label: str) -> Optional[str]:
         """
         Возвращает сообщение для заданной кнопки по лейблу.
         Если кнопки нет в меню, возвращает None.
         """
         for row in self.__menu:
-            if row.get(self.__key_label, None) == label:
-                return row.get(self.__key_message, None)
+            if row.get(self.key_label, None) == label:
+                return row.get(self.key_message, None)
         return None
 
-    def get_message_by_index(self, label: str) -> str | None:
+    def get_message_by_index(self, label: str) -> Optional[str]:
         """
         Возвращает сообщение для заданной кнопки по индексу.
         Если кнопки нет в меню, возвращает None.
         """
         for row in self.__menu:
             if label.isdigit() and self.__menu.index(row) == int(label):
-                return row.get(self.__key_message, None)
+                return row.get(self.key_message, None)
         return None
 
     def get_preview_menu_labels(self) -> str:
@@ -73,7 +74,7 @@ class MenuManager:
         os.makedirs(MENU_FOLDER, exist_ok=True)
         try:
             with open(filename, "w", newline="", encoding=ENCODING) as csvfile:
-                fieldnames = [self.__key_label, self.__key_message]
+                fieldnames = [self.key_label, self.key_message]
                 writer = csv.writer(csvfile)
                 writer.writerow(fieldnames)
                 new_menu_list = []
@@ -86,13 +87,13 @@ class MenuManager:
     def edit_message(self, label: str, new_message: str):
         """Изменение сообщения/информации для выбранной кнопки"""
         for row in self.__menu:
-            if row[self.__key_label] == label:
-                row[self.__key_message] = new_message
+            if row[self.key_label] == label:
+                row[self.key_message] = new_message
         self.__write_file()
 
     def edit_label(self, label: str, new_label: str):
         """Изменение названия/лейбла для выбранной кнопки"""
         for row in self.__menu:
-            if row[self.__key_label] == label:
-                row[self.__key_label] = new_label
+            if row[self.key_label] == label:
+                row[self.key_label] = new_label
         self.__write_file()

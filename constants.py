@@ -21,3 +21,23 @@ CHECKING_UNIQUE = 0
 # Константы проекта
 RELOAD_TIME = 15
 # noga - после падения, бот ждёт 15 сек до перезапуска
+
+# Ключевое слово для настройки меню
+MENU_EDIT_KEY_WORD = "Edit menu"
+
+# Режим клавиатуры для VK inline
+INLINE_KEYBOARD = True
+
+# Шаблоны сообщений для обработчиков команд редактирования меню
+# Дополнительный символ для кнопок меню в режиме редактирования
+EDIT_MODE_ITEM_TEMPLATE = "E{}"
+NUMBERED_LABEL_TEMPLATE = "{}. {} \n"
+SELECTED_MENU_ITEM_TEMPLATE = "".join(
+    (
+        "{}:\n{}\n\n{}:\n{}\n\n",
+        "Редактируем заголовок или информацию?",
+    )
+)
+
+NEW_VALUE_QUESTION_TEMPLATE = "Введите новое значение для {}"
+EDIT_SUCCESS = "Пункт меню успешно обновлен."
