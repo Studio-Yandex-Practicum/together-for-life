@@ -29,16 +29,11 @@ class VKBot:
         user_id, text = event.user_id, event.text
         logger.debug(f"От пользователя {user_id} получено сообщение: {text}")
         if cmd_answ.get(text) is not None:
-            message, keyboard = cmd_answ.get(text)
-            self.__send_message(user_id, message, keyboard)
+            self.__send_message(user_id, *cmd_answ.get(text))
         elif self.__check_for_service_event(event):
             pass
         else:
-            message, keyboard = cmd_answ.get("Начать")
-            self.__send_message(user_id, message, keyboard)
-
-        # message = ECHO_MESSAGE_TEMPLATE.format(text)
-        # self.__send_message(user_id, message)
+            self.__send_message(user_id, *cmd_answ.get("Начать"))
 
     def __check_for_service_event(self, event):
         return False

@@ -23,6 +23,9 @@ menu = MenuManager()
 cmd_answ = dict(
     (
         ("Начать", (menu.get_message_by_index("0"), keyboard_start)),
-        ("Меню", (MENU_MESSAGE, keyboard_menu)),
+        (
+            "Меню",
+            (MENU_MESSAGE.format(*menu.get_menu_labels()[1::]), keyboard_menu),
+        ),
     )
 )
