@@ -8,7 +8,7 @@ from vk_api.longpoll import VkEventType, VkLongPoll
 from vk_api.keyboard import VkKeyboard, MAX_BUTTONS_ON_LINE
 
 from constants import (
-    ECHO_MESSAGE_TEMPLATE,
+    # ECHO_MESSAGE_TEMPLATE,
     CHECKING_UNIQUE,
     MENU_EDIT_KEY_WORD,
     INLINE_KEYBOARD,
@@ -72,8 +72,8 @@ class VKBot:
         logger.debug(
             f"От пользователя {event.user_id} получено сообщение: {event.text}"
         )
-        message = ECHO_MESSAGE_TEMPLATE.format(event.text)
-        self.__send_message(event.user_id, message)
+        # message = ECHO_MESSAGE_TEMPLATE.format(event.text)
+        # self.__send_message(event.user_id, message)
         # Точка входа для обработки сообщений редактирования меню
         self.__check_for_service_event(event.user_id, event.text)
 
