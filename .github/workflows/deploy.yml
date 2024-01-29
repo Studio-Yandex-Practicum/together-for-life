@@ -1,0 +1,30 @@
+name: deploy workflow
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: executing remote ssh commands to deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.PASSPHRASE }}
+        script: |
+          sudo cd /opt
+          sudo [ ! -d together-for-life ] && sudo git clone https://github.com/Studio-Yandex-Practicum/together-for-life.git
+          sudo cd together-for-life
+          sudo git pull
+          sudo docker compose stop
+          sudo docker compose rm vk-bot
+          sudo echo VK_TOKEN=${{secrets.VK_TOKEN}} > .env
+          sudo docker compose up -d
+
+  
