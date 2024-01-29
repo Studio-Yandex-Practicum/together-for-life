@@ -1,11 +1,15 @@
 """Модуль класса бота."""
 import logging
+import os
 
+from dotenv import load_dotenv
 import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
 
 from answers import cmd_answ
 from constants import CHECKING_UNIQUE
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +20,7 @@ class VKBot:
     def __init__(self, vk_token):
         """Метод инициализации."""
         self.__vk_session = vk_api.VkApi(token=vk_token)
+        self.__template_date = dict()
 
     def vkbot_up(self):
         """Метод запуска бота."""
@@ -29,7 +34,17 @@ class VKBot:
         user_id, text = event.user_id, event.text
         logger.debug(f"От пользователя {user_id} получено сообщение: {text}")
         if cmd_answ.get(text) is not None:
+            if user_id in self.__template_date:
+                self.__template_date.pop(user_id)
             self.__send_message(user_id, *cmd_answ.get(text))
+            if text in ["6", "7"]:
+                self.__template_date.setdefault(user_id, text + "_for_adm")
+        elif user_id in self.__template_date:
+            self.__send_message(
+                int(os.getenv("ID_ADMIN")),
+                *cmd_answ.get(self.__template_date.get(user_id)),
+            )
+            self.__template_date.discard(user_id)
         elif self.__check_for_service_event(event):
             pass
         else:
