@@ -98,8 +98,14 @@ class MenuManager:
                 row[self.__key_label] = new_label
         self.__write_file()
 
-    def edit_button_info(self, label_index: str, new_label: str, new_message: str):
-        """Запись нового состояния (имя или сообщение) для выбранной кнопки по индексу"""
+    def edit_button_info(
+            self, label_index: str,
+            new_label: str,
+            new_message: str):
+        """
+        Запись нового состояния (Заголовок или информация)
+        для выбранной кнопки по индексу
+        """
         for row in self.__menu:
             if self.__menu.index(row) == int(label_index):
                 row[self.__key_label] = new_label
