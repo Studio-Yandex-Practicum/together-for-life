@@ -18,13 +18,11 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
-          sudo cd /opt
-          sudo [ ! -d together-for-life ] && sudo git clone https://github.com/Studio-Yandex-Practicum/together-for-life.git
-          sudo cd together-for-life
-          sudo git pull
-          sudo docker compose stop
-          sudo docker compose rm vk-bot
-          sudo echo VK_TOKEN=${{secrets.VK_TOKEN}} > .env
-          sudo docker compose up -d
+          [ ! -d together-for-life ] && sudo git clone https://github.com/Studio-Yandex-Practicum/together-for-life.git
+          cd together-for-life
+          git pull
+          docker compose down
+          echo VK_TOKEN=${{ secrets.VK_TOKEN }} > .env
+          docker compose up --build -d
 
   
