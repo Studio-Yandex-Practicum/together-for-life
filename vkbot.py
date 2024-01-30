@@ -19,7 +19,7 @@ from constants import (
     EMPTY_VALUE,
     CANCEL_BUTTON_LABEL,
     ABORT_MASSAGE,
-    BACKWARD__BUTTON_LABEL,
+    BACKWARD_BUTTON_LABEL,
 )
 
 from utils import MenuManager
@@ -80,7 +80,7 @@ class VKBot:
         ] = self.__cancel_from_edit_mode_handler
         # Команда назад
         self.__service_command_book[
-            BACKWARD__BUTTON_LABEL
+            BACKWARD_BUTTON_LABEL
         ] = self.__backward_in_edit_mode_handler
 
     def vkbot_up(self):
@@ -132,7 +132,7 @@ class VKBot:
         keyboard.add_button(self.__menu.key_label)
         keyboard.add_button(self.__menu.key_message)
         keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
-        keyboard.add_button(BACKWARD__BUTTON_LABEL, VkKeyboardColor.PRIMARY)
+        keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
 
         return keyboard.get_keyboard()
 
@@ -153,7 +153,7 @@ class VKBot:
         Кнопка Отмена."""
         keyboard = self.__get_VK_keyboard()
         keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
-        keyboard.add_button(BACKWARD__BUTTON_LABEL, VkKeyboardColor.PRIMARY)
+        keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
         keyboard.lines
         return keyboard.get_keyboard()
 
@@ -288,12 +288,12 @@ class VKBot:
 
     def __backward_in_edit_mode_handler(self, user_id, text):
         """Обработчик команды Назад в режиме редактирования.
-        На стадии выбора селектора возвращает на стадию выбора пунтка.
+        На стадии выбора селектора возвращает на стадию выбора пункта.
         На вводе нового значения возвращает на стадию выбора селектора.
         Сбрасывает соответсвующий параметр режима редактирования.
         Вызывает обработчик с восстановленными аргументами.
         В случае несоответсвия параметров режима редактирования,
-        сбрасывает.
+        сбрасывает их.
         """
         if (
             user_id == self.__admin_id
