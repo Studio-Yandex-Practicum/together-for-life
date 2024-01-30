@@ -1,6 +1,12 @@
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
-from constants import MENU_MESSAGE
+from constants import (
+    MENU_MESSAGE,
+    TO_ADMIN_DONAT,
+    TO_USER_DONAT,
+    TO_ADMIN_OTHER,
+    TO_USER_OTHER,
+)
 from utils import MenuManager
 
 keyboard_start = VkKeyboard(one_time=False, inline=False)
@@ -41,6 +47,14 @@ cmd_answ = dict(
         (
             "Назад",
             (MENU_MESSAGE.format(*menu.get_menu_labels()[1::]), keyboard_menu),
+        ),
+        (
+            "6_for_adm",
+            ((TO_ADMIN_DONAT, TO_USER_DONAT), keyboard_back),
+        ),
+        (
+            "7_for_adm",
+            ((TO_ADMIN_OTHER, TO_USER_OTHER), keyboard_back),
         ),
     )
 )

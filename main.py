@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Функция работы бота."""
-    bot_vk_chat = VKBot(os.getenv("VK_TOKEN"))
+    bot_vk_chat = VKBot(os.getenv("VK_TOKEN"), os.getenv("ADMIN_ID"))
     while True:
         try:
             bot_vk_chat.vkbot_up()
