@@ -1,3 +1,11 @@
+"""
+Модуль формирования словаря.
+Словарь:
+  ключ - полученный текст от пользователя
+  значение - кортеж из:
+    сообщение для пользователя или кортеж из сообщений(админу, пользователю)
+    кнопки для пользователя
+"""
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from constants import (
@@ -8,6 +16,8 @@ from constants import (
     TO_USER_OTHER,
 )
 from utils import MenuManager
+
+menu = MenuManager()
 
 keyboard_start = VkKeyboard(one_time=False, inline=False)
 keyboard_start.add_button("Меню", color=VkKeyboardColor.POSITIVE)
@@ -27,8 +37,6 @@ keyboard_menu = keyboard_menu.get_keyboard()
 keyboard_back = VkKeyboard(one_time=False, inline=False)
 keyboard_back.add_button("Назад", color=VkKeyboardColor.POSITIVE)
 keyboard_back = keyboard_back.get_keyboard()
-
-menu = MenuManager()
 
 cmd_answ = dict(
     (
