@@ -13,7 +13,6 @@ MENU_FOLDER = "data"
 MENU_FILE_NAME = "menu.csv"
 
 # Константы ВК чат-бота
-ECHO_MESSAGE_TEMPLATE = "Поступило сообщение: {}."
 CHECKING_UNIQUE = 0
 # 0 — проверка на уникальность не нужна.
 # Любое другое число в пределах int32 — проверка на уникальность нужна.
@@ -39,5 +38,11 @@ SELECTED_MENU_ITEM_TEMPLATE = "".join(
     )
 )
 
-NEW_VALUE_QUESTION_TEMPLATE = "Введите новое значение для {}"
+CANCEL_BUTTON_LABEL = "Отмена"
+BACKWARD__BUTTON_LABEL = "Назад"
+NEW_VALUE_QUESTION_TEMPLATE = "".join(
+    ("Введите новое значение для {} ", "или нажмите кнопку Отмена")
+)
 EDIT_SUCCESS = "Пункт меню успешно обновлен."
+EMPTY_VALUE = "Значение меню не может быть пустым."
+ABORT_MASSAGE = "Операция отменена."

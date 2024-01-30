@@ -21,7 +21,6 @@ def main():
     """Функция работы бота."""
     menu = MenuManager()
     bot_vk_chat = VKBot(os.getenv("VK_TOKEN"), os.getenv("ADMIN_ID"), menu)
-    print(os.getenv("VK_TOKEN"))
     while True:
         try:
             bot_vk_chat.vkbot_up()
