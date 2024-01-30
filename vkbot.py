@@ -150,7 +150,7 @@ class VKBot:
 
     def __get_cancel_keyboard_json(self):
         """Возвращает JSON-объект клавиатуры для VK-api.
-        Кнопка Отмена."""
+        Кнопки Отмена и Назад."""
         keyboard = self.__get_VK_keyboard()
         keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
         keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
