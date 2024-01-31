@@ -117,7 +117,7 @@ class MenuManager:
 
 
 def collect_keyboard(
-    buttons: list, one_time=False, inline=False, color=VkKeyboardColor.POSITIVE
+    buttons, one_time=False, inline=False, color=VkKeyboardColor.POSITIVE
 ):
     """Функция создания клавиатуры."""
     keyboard = VkKeyboard(one_time=one_time, inline=inline)
@@ -135,7 +135,7 @@ def get_commands_dict():
     menu = MenuManager()
     keyboard_start = collect_keyboard(["Меню"])
     keyboard_menu = collect_keyboard(
-        [i for i in range(1, len(menu.get_menu_labels()))]
+        [name for name in range(1, len(menu.get_menu_labels()))]
     )
     keyboard_back = collect_keyboard(["Назад"])
     return dict(
