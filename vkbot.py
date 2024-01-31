@@ -63,17 +63,17 @@ class VKBot:
         self.__service_command_book = dict(
             (
                 # Команда редактирования меню
-                (MENU_EDIT_KEY_WORD, self.___edit_menu_keyword_handler),
+                (MENU_EDIT_KEY_WORD, self.__recive_edit_menu_keyword_handler),
                 # Команды для селектора (заголовок или информация)
-                (self.__menu.key_label, self.__edit_selector_handler),
-                (self.__menu.key_message, self.__edit_selector_handler),
+                (self.__menu.key_label, self.__recive_edit_selector_handler),
+                (self.__menu.key_message, self.__recive_edit_selector_handler),
             )
         )
         # Команды редактирования для пунктов меню в формате E0, ..., E7.
         for number in range(len(labels)):
             self.__service_command_book[
                 EDIT_MODE_ITEM_TEMPLATE.format(number)
-            ] = self.__edit_menu_item_select_handler
+            ] = self.__recive_menu_item_to_edit_handler
         # Команда отмены
         self.__service_command_book[
             CANCEL_BUTTON_LABEL
@@ -181,7 +181,7 @@ class VKBot:
                 text, self.__recive_new_value_handler
             )(user_id, text)
 
-    def ___edit_menu_keyword_handler(self, user_id, text):
+    def __recive_edit_menu_keyword_handler(self, user_id, text):
         """Обработчик сообщения команды редактирования меню.
         Выводит меню, включая стартовое сообщение, и нумерованные
         кнопки с префиксом для режима редактирования."""
@@ -199,14 +199,14 @@ class VKBot:
         self.__drop_edit_values()
         self.__menu_edit_mode = True
 
-    def __edit_menu_item_select_handler(self, user_id, text):
+    def __recive_menu_item_to_edit_handler(self, user_id, text):
         """Обработчик для команды выбора пункта меню в режиме редактирования.
         Обрабатывает команд, вида E0,...,E7.
         Полученную команду сохраняет в self.__current_edit_menu_index.
         Выводит выбранный пункт меню включая заголовок с вопросом,
         что именно нужно редактировать, заголовок или информацию
-        выводит соответсвующие кнопки."""
-
+        выводит соответсвующие кнопки.
+        """
         if self.__menu_edit_mode:
             self.__current_edit_menu_index = text[ONE:]
             labels = self.__menu.get_menu_labels()
@@ -229,7 +229,7 @@ class VKBot:
         else:
             self.__drop_edit_values()
 
-    def __edit_selector_handler(self, user_id, text):
+    def __recive_edit_selector_handler(self, user_id, text):
         """Обрабатывает сообщение с командой, что именно нужно
         редактировать, заголовок или информацию, в выбранном ранее
         пункте меню.
@@ -302,7 +302,7 @@ class VKBot:
             and self.__current_edit_selector is not None
         ):
             self.__current_edit_selector = None
-            self.__edit_menu_item_select_handler(
+            self.__recive_menu_item_to_edit_handler(
                 user_id=user_id,
                 text=EDIT_MODE_ITEM_TEMPLATE.format(
                     self.__current_edit_menu_index
@@ -314,7 +314,7 @@ class VKBot:
             and self.__current_edit_menu_index is not None
         ):
             self.__current_edit_menu_index = None
-            self.___edit_menu_keyword_handler(
+            self.__recive_edit_menu_keyword_handler(
                 user_id=user_id, text=MENU_EDIT_KEY_WORD
             )
         else:
