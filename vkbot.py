@@ -125,15 +125,22 @@ class VKBot:
         """Создает и возвращает объект клавиатуры для бота VK."""
         return VkKeyboard(inline=INLINE_KEYBOARD)
 
+    def __add_cancel_button(self, keyboard: VkKeyboard):
+        """Добавляет кнопку Отмена к объекту клавиатуры."""
+        keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
+
+    def __add_backward_button(self, keyboard: VkKeyboard):
+        """Добавляет кнопку Назад к объекту клавиатуры."""
+        keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
+
     def __get_selector_keyboard_json(self):
         """Возвращает JSON-объект клавиатуры для VK-api.
         Кнопки селектора (Заголовок, Информация)"""
         keyboard = self.__get_VK_keyboard()
         keyboard.add_button(self.__menu.key_label)
         keyboard.add_button(self.__menu.key_message)
-        keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
-        keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
-
+        self.__add_cancel_button(keyboard)
+        self.__add_backward_button(keyboard)
         return keyboard.get_keyboard()
 
     def __get_menu_items_to_edit_keyboard_json(self, menu_length: int):
@@ -145,16 +152,15 @@ class VKBot:
             keyboard.add_button(EDIT_MODE_ITEM_TEMPLATE.format(number))
             if (number + ONE) % MAX_BUTTONS_ON_LINE == ZERO:
                 keyboard.add_line()
-        keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
+        self.__add_cancel_button(keyboard)
         return keyboard.get_keyboard()
 
-    def __get_cancel_keyboard_json(self):
+    def __get_cancel_backward_keyboard_json(self):
         """Возвращает JSON-объект клавиатуры для VK-api.
         Кнопки Отмена и Назад."""
         keyboard = self.__get_VK_keyboard()
-        keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
-        keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
-        keyboard.lines
+        self.__add_cancel_button(keyboard)
+        self.__add_backward_button(keyboard)
         return keyboard.get_keyboard()
 
     def __drop_edit_values(self):
@@ -245,7 +251,7 @@ class VKBot:
             self.__send_message(
                 user_id=user_id,
                 message_text=message,
-                keyboard=self.__get_cancel_keyboard_json(),
+                keyboard=self.__get_cancel_backward_keyboard_json(),
             )
         else:
             self.__drop_edit_values()
