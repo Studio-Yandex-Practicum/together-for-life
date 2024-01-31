@@ -5,7 +5,7 @@ import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
 
 from constants import CHECKING_UNIQUE
-from utils import get_commands_dict
+from utils import collect_keyboard, get_commands_dict, MenuManager
 
 logger = logging.getLogger(__name__)
 cmd_answ = get_commands_dict()
@@ -14,11 +14,12 @@ cmd_answ = get_commands_dict()
 class VKBot:
     """Класс ВК чат-бота."""
 
-    def __init__(self, vk_token, vk_admin_user_id):
+    def __init__(self, vk_token, vk_admin_user_id, menu: MenuManager):
         """Метод инициализации."""
         self.__vk_session = vk_api.VkApi(token=vk_token)
         self.__admin_id = int(vk_admin_user_id)
         self.__template_date = dict()
+        self.__menu = menu
 
     def vkbot_up(self):
         """Метод запуска бота."""
@@ -34,13 +35,19 @@ class VKBot:
 
         if cmd_answ.get(text) is not None:
             self.__send_message(user_id, *cmd_answ.get(text))
+        elif self.__menu.get_message_by_index(text) is not None:
+            self.__send_message(
+                user_id,
+                self.__menu.get_message_by_index(text),
+                collect_keyboard(["Назад"]),
+            )
             self.__check_for_service_event(user_id, text)
         elif user_id in self.__template_date:
-            (masege_to_admin, masege_to_user), keyboard = cmd_answ.get(
+            (massege_to_admin, masege_to_user), keyboard = cmd_answ.get(
                 self.__template_date.get(user_id)
             )
             self.__send_message(
-                self.__admin_id, masege_to_admin.format(user_id, text)
+                self.__admin_id, massege_to_admin.format(user_id, text)
             )
             self.__send_message(user_id, masege_to_user, keyboard)
             self.__template_date.pop(user_id)

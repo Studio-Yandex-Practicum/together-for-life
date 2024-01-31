@@ -10,6 +10,7 @@ from vk_api.exceptions import ApiError
 from constants import RELOAD_TIME
 from logger_config import init_globals_logging
 from vkbot import VKBot
+from utils import MenuManager
 
 load_dotenv()
 
@@ -18,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Функция работы бота."""
-    bot_vk_chat = VKBot(os.getenv("VK_TOKEN"), os.getenv("ADMIN_ID"))
+    menu = MenuManager()
+    bot_vk_chat = VKBot(os.getenv("VK_TOKEN"), os.getenv("ADMIN_ID"), menu)
     while True:
         try:
             bot_vk_chat.vkbot_up()
