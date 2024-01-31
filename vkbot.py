@@ -57,6 +57,8 @@ class VKBot:
         )
         self.__menu_edit_key_word = os.getenv("MENU_EDIT_KEY_WORD")
         self.__make_service_command_book()
+        # Сигнальный аттрибут, обработана текущая команда или нет.
+        self.__is_current_command_handled = False
 
     def __make_service_command_book(self):
         """Составляет словарь команд режима редактирования меню для бота.
@@ -99,8 +101,12 @@ class VKBot:
         )
         # Точка входа для обработки сообщений редактирования меню
         self.__check_for_edit_menu_events(event.user_id, event.text)
-        # Здесь обработка команд для чтения меню.
-        pass
+        # Если команда не обработана в блоке режима редактирования,
+        # то продолжить обработку в блоке чтения меню.
+        if not self.__is_current_command_handled:
+            # Здесь обработка команд для чтения меню.
+            pass
+        self.__is_current_command_handled = False
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
@@ -214,9 +220,10 @@ class VKBot:
         )
         # Сброс параметров режима редактирования
         self.__drop_edit_values()
-        # Устанавливаем, что бот получил серктеное слово
+        # Устанавливаем, что бот получил секретное слово
         # и вошел в режим редактирования меню.
         self.__menu_edit_mode = True
+        self.__is_current_command_handled = True
 
     def __recive_menu_item_to_edit_handler(self, user_id, text):
         """Вторая стадия режима редактирования - выбран пункт меню.
@@ -247,6 +254,7 @@ class VKBot:
                 message_text=message,
                 keyboard=self.__get_selector_keyboard_json(),
             )
+            self.__is_current_command_handled = True
         else:
             # Если ранее серетного слова не было, но поступила команда
             # с пунктом меню в формате редактирования - сброс параметров
@@ -273,6 +281,7 @@ class VKBot:
                 message_text=message,
                 keyboard=self.__get_cancel_backward_keyboard_json(),
             )
+            self.__is_current_command_handled = True
         else:
             # При поступлении смешанных команд - сброс
             # параметров редактирования.
@@ -303,6 +312,7 @@ class VKBot:
                 self.__send_message(user_id, EDIT_SUCCESS_MESSAGE)
             else:
                 self.__send_message(user_id, EMPTY_VALUE_MASSAGE)
+            self.__is_current_command_handled = True
         # Если ввод текста не соответсвует текущей стадии режима
         # редактирования, или поступили смешанные команды, то
         # сброс параметров редактирования
@@ -320,6 +330,7 @@ class VKBot:
             or self.__current_edit_selector is not None
         ):
             self.__send_message(user_id=user_id, message_text=ABORT_MASSAGE)
+            self.__is_current_command_handled = True
         self.__drop_edit_values()
 
     def __backward_in_edit_mode_handler(self, **kwargs):
@@ -347,7 +358,7 @@ class VKBot:
                     self.__current_edit_menu_index
                 ),
             )
-        # Если бот на второй стадии - выбран пункт  меню для редактирования,
+        # Если бот на второй стадии - выбран пункт меню для редактирования,
         # ожидается ввод селектора.
         elif (
             user_id == self.__admin_id
@@ -362,6 +373,7 @@ class VKBot:
         # ожидается выбор пункта меню, и в остальных случаях.
         else:
             self.__drop_edit_values()
+        self.__is_current_command_handled = True
 
     def __is_text_valid(self, text: str) -> bool:
         """Проверяет, что текст сообщения не None,
