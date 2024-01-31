@@ -21,9 +21,6 @@ CHECKING_UNIQUE = 0
 RELOAD_TIME = 15
 # noga - после падения, бот ждёт 15 сек до перезапуска
 
-# Ключевое слово для настройки меню
-MENU_EDIT_KEY_WORD = "Edit menu"
-
 # Режим клавиатуры для VK inline
 INLINE_KEYBOARD = True
 

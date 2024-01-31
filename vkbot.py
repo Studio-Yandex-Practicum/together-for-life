@@ -2,6 +2,7 @@
 
 
 import logging
+import os
 
 import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
@@ -9,7 +10,6 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor, MAX_BUTTONS_ON_LINE
 
 from constants import (
     CHECKING_UNIQUE,
-    MENU_EDIT_KEY_WORD,
     INLINE_KEYBOARD,
     EDIT_MODE_ITEM_TEMPLATE,
     NUMBERED_LABEL_TEMPLATE,
@@ -25,6 +25,7 @@ from constants import (
 from utils import MenuManager
 
 ZERO = 0
+USER_ID = "user_id"
 ONE = 1
 
 
@@ -55,6 +56,7 @@ class VKBot:
                 (self.__menu.key_message, self.__menu.edit_message),
             )
         )
+        self.__menu_edit_key_word = os.getenv("MENU_EDIT_KEY_WORD")
         self.__make_service_command_book()
 
     def __make_service_command_book(self):
@@ -63,7 +65,10 @@ class VKBot:
         self.__service_command_book = dict(
             (
                 # Команда редактирования меню
-                (MENU_EDIT_KEY_WORD, self.__recive_edit_menu_keyword_handler),
+                (
+                    self.__menu_edit_key_word,
+                    self.__recive_edit_menu_keyword_handler,
+                ),
                 # Команды для селектора (заголовок или информация)
                 (self.__menu.key_label, self.__recive_edit_selector_handler),
                 (self.__menu.key_message, self.__recive_edit_selector_handler),
@@ -185,12 +190,13 @@ class VKBot:
         if user_id == self.__admin_id and text is not None:
             self.__service_command_book.get(
                 text, self.__recive_new_value_handler
-            )(user_id, text)
+            )(user_id=user_id, text=text)
 
-    def __recive_edit_menu_keyword_handler(self, user_id, text):
+    def __recive_edit_menu_keyword_handler(self, **kwargs):
         """Обработчик сообщения команды редактирования меню.
         Выводит меню, включая стартовое сообщение, и нумерованные
         кнопки с префиксом для режима редактирования."""
+        user_id = kwargs.get(USER_ID)
         labels = self.__menu.get_menu_labels()
         menu_message = ""
         for number in range(len(labels)):
@@ -279,11 +285,12 @@ class VKBot:
                 self.__send_message(user_id, EMPTY_VALUE)
         self.__drop_edit_values()
 
-    def __cancel_from_edit_mode_handler(self, user_id, text):
+    def __cancel_from_edit_mode_handler(self, **kwargs):
         """Обработчик команды отмены редактирования.
         Cбрасывает сохраненные параметры режима редактирования меню.
         Выводит сообщение об отмене операции, если бот
         находился в режиме редактирования меню."""
+        user_id = kwargs.get(USER_ID)
         if (
             self.__menu_edit_mode
             or self.__current_edit_menu_index is not None
@@ -292,7 +299,7 @@ class VKBot:
             self.__send_message(user_id=user_id, message_text=ABORT_MASSAGE)
         self.__drop_edit_values()
 
-    def __backward_in_edit_mode_handler(self, user_id, text):
+    def __backward_in_edit_mode_handler(self, **kwargs):
         """Обработчик команды Назад в режиме редактирования.
         На стадии выбора селектора возвращает на стадию выбора пункта.
         На вводе нового значения возвращает на стадию выбора селектора.
@@ -301,6 +308,7 @@ class VKBot:
         В случае несоответсвия параметров режима редактирования,
         сбрасывает их.
         """
+        user_id = kwargs.get(USER_ID)
         if (
             user_id == self.__admin_id
             and self.__menu_edit_mode
@@ -321,7 +329,7 @@ class VKBot:
         ):
             self.__current_edit_menu_index = None
             self.__recive_edit_menu_keyword_handler(
-                user_id=user_id, text=MENU_EDIT_KEY_WORD
+                user_id=user_id, text=self.__menu_edit_key_word
             )
         else:
             self.__drop_edit_values()
