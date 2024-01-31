@@ -40,6 +40,6 @@ BACKWARD_BUTTON_LABEL = "Назад"
 NEW_VALUE_QUESTION_TEMPLATE = "".join(
     ("Введите новое значение для {} ", "или нажмите кнопку Отмена")
 )
-EDIT_SUCCESS = "Пункт меню успешно обновлен."
-EMPTY_VALUE = "Значение меню не может быть пустым."
+EDIT_SUCCESS_MESSAGE = "Пункт меню успешно обновлен."
+EMPTY_VALUE_MASSAGE = "Значение меню не может быть пустым."
 ABORT_MASSAGE = "Операция отменена."

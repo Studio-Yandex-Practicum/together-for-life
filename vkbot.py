@@ -14,8 +14,8 @@ from constants import (
     CANCEL_BUTTON_LABEL,
     CHECKING_UNIQUE,
     EDIT_MODE_ITEM_TEMPLATE,
-    EDIT_SUCCESS,
-    EMPTY_VALUE,
+    EDIT_SUCCESS_MESSAGE,
+    EMPTY_VALUE_MASSAGE,
     INLINE_KEYBOARD,
     NEW_VALUE_QUESTION_TEMPLATE,
     NUMBERED_LABEL_TEMPLATE,
@@ -300,9 +300,9 @@ class VKBot:
                 self.__edit_functions.get(self.__current_edit_selector)(
                     labels[menu_index], text.strip()
                 )
-                self.__send_message(user_id, EDIT_SUCCESS)
+                self.__send_message(user_id, EDIT_SUCCESS_MESSAGE)
             else:
-                self.__send_message(user_id, EMPTY_VALUE)
+                self.__send_message(user_id, EMPTY_VALUE_MASSAGE)
         # Если ввод текста не соответсвует текущей стадии режима
         # редактирования, или поступили смешанные команды, то
         # сброс параметров редактирования
