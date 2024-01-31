@@ -1,4 +1,9 @@
-"""Модуль класса реализации чтения и записи файла csv."""
+"""
+Модуль утилит проекта:
+MenuManager - формирования меню кнопок и их сообщений
+collect_keyboard - получение клавиатуры
+get_commands_dict - получения словаря комманд
+"""
 
 import csv
 import logging
@@ -7,7 +12,19 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from constants import ENCODING, MENU_FILE_NAME, MENU_FOLDER
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+
+from constants import (
+    ENCODING,
+    MENU_FILE_NAME,
+    MENU_FOLDER,
+    MAX_BUTONS,
+    MENU_MESSAGE,
+    TO_ADMIN_DONAT,
+    TO_USER_DONAT,
+    TO_ADMIN_OTHER,
+    TO_USER_OTHER,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -97,3 +114,61 @@ class MenuManager:
             if row[self.__key_label] == label:
                 row[self.__key_label] = new_label
         self.__write_file()
+
+
+def collect_keyboard(
+    buttons: list, one_time=False, inline=False, color=VkKeyboardColor.POSITIVE
+):
+    """Функция создания клавиатуры."""
+    keyboard = VkKeyboard(one_time=one_time, inline=inline)
+    count_buttons = 0
+    for button in buttons:
+        keyboard.add_button(str(button), color=color)
+        count_buttons += 1
+        if count_buttons % MAX_BUTONS == 0:
+            keyboard.add_line()
+    return keyboard.get_keyboard()
+
+
+def get_commands_dict():
+    """Функция получения словаря комманд."""
+    menu = MenuManager()
+    keyboard_start = collect_keyboard(["Меню"])
+    keyboard_menu = collect_keyboard(
+        [i for i in range(1, len(menu.get_menu_labels()))]
+    )
+    keyboard_back = collect_keyboard(["Назад"])
+    return dict(
+        (
+            ("Начать", (menu.get_message_by_index("0"), keyboard_start)),
+            ("1", (menu.get_message_by_index("1"), keyboard_back)),
+            ("2", (menu.get_message_by_index("2"), keyboard_back)),
+            ("3", (menu.get_message_by_index("3"), keyboard_back)),
+            ("4", (menu.get_message_by_index("4"), keyboard_back)),
+            ("5", (menu.get_message_by_index("5"), keyboard_back)),
+            ("6", (menu.get_message_by_index("6"), keyboard_back)),
+            ("7", (menu.get_message_by_index("7"), keyboard_back)),
+            (
+                "Меню",
+                (
+                    MENU_MESSAGE.format(*menu.get_menu_labels()[1::]),
+                    keyboard_menu,
+                ),
+            ),
+            (
+                "Назад",
+                (
+                    MENU_MESSAGE.format(*menu.get_menu_labels()[1::]),
+                    keyboard_menu,
+                ),
+            ),
+            (
+                "6_for_adm",
+                ((TO_ADMIN_DONAT, TO_USER_DONAT), keyboard_back),
+            ),
+            (
+                "7_for_adm",
+                ((TO_ADMIN_OTHER, TO_USER_OTHER), keyboard_back),
+            ),
+        )
+    )

@@ -4,10 +4,11 @@ import logging
 import vk_api
 from vk_api.longpoll import VkEventType, VkLongPoll
 
-from answers import cmd_answ
 from constants import CHECKING_UNIQUE
+from utils import get_commands_dict
 
 logger = logging.getLogger(__name__)
+cmd_answ = get_commands_dict()
 
 
 class VKBot:
