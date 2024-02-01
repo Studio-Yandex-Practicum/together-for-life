@@ -89,7 +89,6 @@ class VKBot:
                 EDIT_MODE_ITEM_TEMPLATE.format(number)
             ] = self.__recive_menu_item_to_edit_handler
 
-
     def vkbot_up(self):
         """Метод запуска бота."""
         logger.debug("Запуск Бота.")
@@ -127,7 +126,6 @@ class VKBot:
                 self.__templ_date.pop(user_id)
             else:
                 self.__send_message(user_id, *self.__cmd_answ("Начать"))
-          
         self.__is_current_command_handled = False
 
     def __check_for_service_event(self, user_id, text):
