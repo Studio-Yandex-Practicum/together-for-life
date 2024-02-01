@@ -22,11 +22,13 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
-          [ ! -d together-for-life ] && sudo git clone https://github.com/Studio-Yandex-Practicum/together-for-life.git
+          [ ! -d together-for-life ] && git clone https://github.com/Studio-Yandex-Practicum/together-for-life.git
           cd together-for-life
           git pull
           docker compose down
           echo VK_TOKEN=${{ secrets.VK_TOKEN }} > .env
+          echo ADMIN_ID=${{ secrets.ADMIN_ID }} >> .env
+          echo MENU_EDIT_KEY_WORD=${{ secrets.MENU_EDIT_KEY_WORD }} >> .env
           docker compose up --build -d
 
   
