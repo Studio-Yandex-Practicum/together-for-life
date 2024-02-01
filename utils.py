@@ -114,6 +114,17 @@ class MenuManager:
                 row[self.__key_label] = new_label
         self.__write_file()
 
+    def edit_button_info(self, button_index: str, label: str, message: str):
+        """
+        Запись нового состояния (Заголовок или информация)
+        для выбранной кнопки по индексу
+        """
+        for row in self.__menu:
+            if self.__menu.index(row) == int(button_index):
+                row[self.__key_label] = label
+                row[self.__key_message] = message
+        self.__write_file()
+
 
 def collect_keyboard(
     buttons, one_time=False, inline=False, color=VkKeyboardColor.POSITIVE
