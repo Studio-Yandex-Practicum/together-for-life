@@ -60,7 +60,7 @@ class VKBot:
         # Сигнальный аттрибут, обработана текущая команда или нет.
         self.__is_current_command_handled = False
         self.__templ_date = dict()
-        self.__cmd_answ = get_commands_dict(menu)
+        self.__cmd_answ = get_commands_dict(self.__menu)
 
     def __make_service_command_book(self):
         """Составляет словарь команд режима редактирования меню для бота.
@@ -335,6 +335,8 @@ class VKBot:
                     labels[menu_index], text.strip()
                 )
                 self.__send_message(user_id, EDIT_SUCCESS_MESSAGE)
+                # Обновляем словарь команд для режима чтения
+                self.__cmd_answ = get_commands_dict(self.__menu)
             else:
                 self.__send_message(user_id, EMPTY_VALUE_MASSAGE)
             self.__is_current_command_handled = True
@@ -383,6 +385,7 @@ class VKBot:
                     self.__current_edit_menu_index
                 ),
             )
+            self.__is_current_command_handled = True
         # Если бот на второй стадии - выбран пункт меню для редактирования,
         # ожидается ввод селектора.
         elif (
@@ -394,11 +397,12 @@ class VKBot:
             self.__recive_edit_menu_keyword_handler(
                 user_id=user_id, text=self.__menu_edit_key_word
             )
+            self.__is_current_command_handled = True
         # Если бот на первой стадии - введено секретное слово,
         # ожидается выбор пункта меню, и в остальных случаях.
         else:
             self.__drop_edit_values()
-        self.__is_current_command_handled = True
+            # self.__is_current_command_handled = True
 
     def __is_text_valid(self, text: str) -> bool:
         """Проверяет, что текст сообщения не None,
