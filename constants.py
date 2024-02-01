@@ -13,7 +13,6 @@ MENU_FOLDER = "data"
 MENU_FILE_NAME = "menu.csv"
 
 # Константы ВК чат-бота
-ECHO_MESSAGE_TEMPLATE = "Поступило сообщение: {}."
 CHECKING_UNIQUE = 0
 # 0 — проверка на уникальность не нужна.
 # Любое другое число в пределах int32 — проверка на уникальность нужна.
@@ -26,3 +25,26 @@ TO_USER_OTHER = "Ваше обращение отправленно специа
 # Константы проекта
 RELOAD_TIME = 15
 # noga - после падения, бот ждёт 15 сек до перезапуска
+
+# Режим клавиатуры для VK inline
+INLINE_KEYBOARD = True
+
+# Шаблоны сообщений для обработчиков команд редактирования меню
+# Дополнительный символ для кнопок меню в режиме редактирования
+EDIT_MODE_ITEM_TEMPLATE = "E{}"
+NUMBERED_LABEL_TEMPLATE = "{}. {} \n"
+SELECTED_MENU_ITEM_TEMPLATE = "".join(
+    (
+        "{}:\n{}\n\n{}:\n{}\n\n",
+        "Редактируем заголовок или информацию?",
+    )
+)
+
+CANCEL_BUTTON_LABEL = "Отмена"
+BACKWARD_BUTTON_LABEL = "Назад"
+NEW_VALUE_QUESTION_TEMPLATE = "".join(
+    ("Введите новое значение для {} ", "или нажмите кнопку Отмена")
+)
+EDIT_SUCCESS_MESSAGE = "Пункт меню успешно обновлен."
+EMPTY_VALUE_MASSAGE = "Значение меню не может быть пустым."
+ABORT_MASSAGE = "Операция отменена."

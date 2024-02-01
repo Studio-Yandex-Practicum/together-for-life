@@ -1,11 +1,32 @@
 """Модуль класса бота."""
+
+
 import logging
+import os
 
 import vk_api
+from vk_api.keyboard import MAX_BUTTONS_ON_LINE, VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkEventType, VkLongPoll
 
-from constants import CHECKING_UNIQUE
+from constants import (
+    ABORT_MASSAGE,
+    BACKWARD_BUTTON_LABEL,
+    CANCEL_BUTTON_LABEL,
+    CHECKING_UNIQUE,
+    EDIT_MODE_ITEM_TEMPLATE,
+    EDIT_SUCCESS_MESSAGE,
+    EMPTY_VALUE_MASSAGE,
+    INLINE_KEYBOARD,
+    NEW_VALUE_QUESTION_TEMPLATE,
+    NUMBERED_LABEL_TEMPLATE,
+    SELECTED_MENU_ITEM_TEMPLATE,
+)
 from utils import collect_keyboard, get_commands_dict, MenuManager
+
+ONE = 1
+USER_ID = "user_id"
+ZERO = 0
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +38,56 @@ class VKBot:
         """Метод инициализации."""
         self.__vk_session = vk_api.VkApi(token=vk_token)
         self.__admin_id = int(vk_admin_user_id)
-        self.__templ_date = dict()
         self.__menu = menu
-        self.__cmd_answ = get_commands_dict(menu)
+        # Параметры текущего режима редактирования меню
+        # Режим редактирования меню включен (введено секретное слово)
+        self.__menu_edit_mode = False
+        # Выбранный индекс пункта меню для редактирования
+        self.__current_edit_menu_index = None
+        # Выбранный селектор (что редактировать: Заголовок или Информацию)
+        self.__current_edit_selector = None
+        # Словарь функций редактирования меню,
+        # используется совместно с селектором
+        # в обработчике __recive_new_value_handler
+        self.__edit_functions = dict(
+            (
+                (self.__menu.key_label, self.__menu.edit_label),
+                (self.__menu.key_message, self.__menu.edit_message),
+            )
+        )
+        self.__menu_edit_key_word = os.getenv("MENU_EDIT_KEY_WORD")
+        self.__make_service_command_book()
+        # Сигнальный аттрибут, обработана текущая команда или нет.
+        self.__is_current_command_handled = False
+        self.__templ_date = dict()
+        self.__cmd_answ = get_commands_dict(self.__menu)
+
+    def __make_service_command_book(self):
+        """Составляет словарь команд режима редактирования меню для бота.
+        Ключ - команда (строка)
+        Значение - метод настоящего класса, который обрабатывает команду."""
+        labels = self.__menu.get_menu_labels()
+        self.__service_command_book = dict(
+            (
+                # Команда редактирования меню
+                (
+                    self.__menu_edit_key_word,
+                    self.__recive_edit_menu_keyword_handler,
+                ),
+                # Команды для селектора (заголовок или информация)
+                (self.__menu.key_label, self.__recive_edit_selector_handler),
+                (self.__menu.key_message, self.__recive_edit_selector_handler),
+                # Команда отмены
+                (CANCEL_BUTTON_LABEL, self.__cancel_from_edit_mode_handler),
+                # Команда назад
+                (BACKWARD_BUTTON_LABEL, self.__backward_in_edit_mode_handler),
+            )
+        )
+        # Команды редактирования для пунктов меню в формате E0, ..., E7.
+        for number in range(len(labels)):
+            self.__service_command_book[
+                EDIT_MODE_ITEM_TEMPLATE.format(number)
+            ] = self.__recive_menu_item_to_edit_handler
 
     def vkbot_up(self):
         """Метод запуска бота."""
@@ -32,27 +100,33 @@ class VKBot:
         """Метод разбора события новое сообщение."""
         user_id, text = event.user_id, event.text
         logger.debug(f"От пользователя {user_id} получено сообщение: {text}")
-
-        if self.__cmd_answ.get(text) is not None:
-            self.__send_message(user_id, *self.__cmd_answ.get(text))
-        elif self.__menu.get_message_by_index(text) is not None:
-            self.__send_message(
-                user_id,
-                self.__menu.get_message_by_index(text),
-                collect_keyboard(["Назад"]),
-            )
-            self.__check_for_service_event(user_id, text)
-        elif user_id in self.__templ_date:
-            (massege_admin, massege_user), keyboard = self.__cmd_answ.get(
-                self.__templ_date.get(user_id)
-            )
-            self.__send_message(
-                self.__admin_id, massege_admin.format(user_id, text)
-            )
-            self.__send_message(user_id, massege_user, keyboard)
-            self.__templ_date.pop(user_id)
-        else:
-            self.__send_message(user_id, *self.__cmd_answ("Начать"))
+        # Точка входа для обработки сообщений редактирования меню
+        self.__check_for_edit_menu_events(user_id, text)
+        # Если команда не обработана в блоке режима редактирования,
+        # то продолжить обработку в блоке чтения меню.
+        if not self.__is_current_command_handled:
+            # Здесь обработка команд для чтения меню.
+            if self.__cmd_answ.get(text) is not None:
+                self.__send_message(user_id, *self.__cmd_answ.get(text))
+            elif self.__menu.get_message_by_index(text) is not None:
+                self.__send_message(
+                    user_id,
+                    self.__menu.get_message_by_index(text),
+                    collect_keyboard(["Назад"]),
+                )
+                self.__check_for_service_event(user_id, text)
+            elif user_id in self.__templ_date:
+                (massege_admin, massege_user), keyboard = self.__cmd_answ.get(
+                    self.__templ_date.get(user_id)
+                )
+                self.__send_message(
+                    self.__admin_id, massege_admin.format(user_id, text)
+                )
+                self.__send_message(user_id, massege_user, keyboard)
+                self.__templ_date.pop(user_id)
+            else:
+                self.__send_message(user_id, *self.__cmd_answ("Начать"))
+        self.__is_current_command_handled = False
 
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
@@ -79,3 +153,258 @@ class VKBot:
                 f"При отправке пользователю {user_id} сообщения: "
                 f"{message_text}. Произошла ошибка: {error}."
             )
+
+    def __get_VK_keyboard(self):
+        """Создает и возвращает объект клавиатуры для бота VK."""
+        return VkKeyboard(inline=INLINE_KEYBOARD)
+
+    def __add_cancel_button(self, keyboard: VkKeyboard):
+        """Добавляет кнопку Отмена к объекту клавиатуры."""
+        keyboard.add_button(CANCEL_BUTTON_LABEL, VkKeyboardColor.NEGATIVE)
+
+    def __add_backward_button(self, keyboard: VkKeyboard):
+        """Добавляет кнопку Назад к объекту клавиатуры."""
+        keyboard.add_button(BACKWARD_BUTTON_LABEL, VkKeyboardColor.PRIMARY)
+
+    def __get_selector_keyboard_json(self):
+        """Возвращает JSON-объект клавиатуры для VK-api.
+        Кнопки селектора (Заголовок, Информация)"""
+        keyboard = self.__get_VK_keyboard()
+        keyboard.add_button(self.__menu.key_label)
+        keyboard.add_button(self.__menu.key_message)
+        self.__add_cancel_button(keyboard)
+        self.__add_backward_button(keyboard)
+        return keyboard.get_keyboard()
+
+    def __get_menu_items_to_edit_keyboard_json(self, menu_length: int):
+        """Возвращает JSON-объект клавиатуры для VK-api.
+        Кнопки выбора элемента меню для редактирования, вида:
+        E0,...,E7, и Отмена."""
+        keyboard = self.__get_VK_keyboard()
+        for number in range(menu_length):
+            keyboard.add_button(EDIT_MODE_ITEM_TEMPLATE.format(number))
+            if (number + ONE) % MAX_BUTTONS_ON_LINE == ZERO:
+                keyboard.add_line()
+        self.__add_cancel_button(keyboard)
+        return keyboard.get_keyboard()
+
+    def __get_cancel_backward_keyboard_json(self):
+        """Возвращает JSON-объект клавиатуры для VK-api.
+        Кнопки Отмена и Назад."""
+        keyboard = self.__get_VK_keyboard()
+        self.__add_cancel_button(keyboard)
+        self.__add_backward_button(keyboard)
+        return keyboard.get_keyboard()
+
+    def __drop_edit_values(self):
+        """Задает значения None для сохраненных
+        для редактирования пункта меню и селектора
+        (заголовок или информация),
+        режим редактирования меню устанавливает в False.
+        Вызывается, также в случаях когда, в обработчиках
+        не получены ожидаемые значения или поступили смешанные
+        команды, не соотвествующие текущим значения параметров
+        режима реактирования.
+        """
+        self.__current_edit_menu_index = None
+        self.__current_edit_selector = None
+        self.__menu_edit_mode = False
+
+    def __check_for_edit_menu_events(self, user_id, text):
+        """Метод проверяет, что сообщение от администратора группы.
+        Запускает обработчик сообщений по словарю
+        self.__service_command_book.
+        Все сервисные обработчик сообщений получают в качестве
+        аргументов user_id и text.
+        По команде в text из словаря извлекается метод-обработчик,
+        в него передаются user_id и поступивший text.
+        Если подходящей команды в словаре нет, вызвается метовд
+        self.__recive_new_value_handler, он обрабатывает свободный текст.
+        """
+        if user_id == self.__admin_id and text is not None:
+            self.__service_command_book.get(
+                text, self.__recive_new_value_handler
+            )(user_id=user_id, text=text)
+
+    def __recive_edit_menu_keyword_handler(self, **kwargs):
+        """Первая стадия редактирования - получено секретное слово.
+        Обработчик сообщения команды редактирования меню.
+        Выводит меню, включая стартовое сообщение, и нумерованные
+        кнопки с префиксом для режима редактирования."""
+        user_id = kwargs.get(USER_ID)
+        labels = self.__menu.get_menu_labels()
+        menu_message = ""
+        for number in range(len(labels)):
+            menu_message += NUMBERED_LABEL_TEMPLATE.format(
+                number, labels[number]
+            )
+        self.__send_message(
+            user_id=user_id,
+            message_text=menu_message,
+            keyboard=self.__get_menu_items_to_edit_keyboard_json(len(labels)),
+        )
+        # Сброс параметров режима редактирования
+        self.__drop_edit_values()
+        # Устанавливаем, что бот получил секретное слово
+        # и вошел в режим редактирования меню.
+        self.__menu_edit_mode = True
+        self.__is_current_command_handled = True
+
+    def __recive_menu_item_to_edit_handler(self, user_id, text):
+        """Вторая стадия режима редактирования - выбран пункт меню.
+        Обработчик для команды выбора пункта меню в режиме редактирования.
+        Обрабатывает команды, вида E0,...,E7.
+        Полученную команду сохраняет в self.__current_edit_menu_index.
+        Выводит выбранный пункт меню включая заголовок с вопросом,
+        что именно нужно редактировать, заголовок или информацию
+        выводит соответсвующие кнопки.
+        """
+        # Проверяется, что ранее было получено секретное слово.
+        if self.__menu_edit_mode:
+            self.__current_edit_menu_index = text[ONE:]
+            labels = self.__menu.get_menu_labels()
+            message = SELECTED_MENU_ITEM_TEMPLATE.format(
+                self.__menu.key_label,
+                labels[int(self.__current_edit_menu_index)],
+                self.__menu.key_message,
+                self.__menu.get_message_by_index(
+                    self.__current_edit_menu_index
+                ),
+            )
+
+            # Выводим пункт меню и информацию
+            # Кнопки селетора редактирования (заголовок или информация)
+            self.__send_message(
+                user_id=user_id,
+                message_text=message,
+                keyboard=self.__get_selector_keyboard_json(),
+            )
+            self.__is_current_command_handled = True
+        else:
+            # Если ранее серетного слова не было, но поступила команда
+            # с пунктом меню в формате редактирования - сброс параметров
+            # редактирования
+            self.__drop_edit_values()
+
+    def __recive_edit_selector_handler(self, user_id, text):
+        """Третья стадия - выбрано, что редактировать
+        (Заголовок или Информацияю).
+        Обрабатывает сообщение с командой, что именно нужно
+        редактировать, заголовок или информацию, в выбранном ранее
+        пункте меню.
+        Проверяет, что ранее был выбран пункт меню
+        (self.__current_edit_menu_index) и получено секретное слово.
+        Сохраняет полученное значение в self.__current_edit_selector.
+        Отправляет сообщение с запросом нового значения
+        и кнопку Отмена.
+        """
+        if self.__menu_edit_mode and self.__current_edit_menu_index:
+            self.__current_edit_selector = text
+            message = NEW_VALUE_QUESTION_TEMPLATE.format(text)
+            self.__send_message(
+                user_id=user_id,
+                message_text=message,
+                keyboard=self.__get_cancel_backward_keyboard_json(),
+            )
+            self.__is_current_command_handled = True
+        else:
+            # При поступлении смешанных команд - сброс
+            # параметров редактирования.
+            self.__drop_edit_values()
+
+    def __recive_new_value_handler(self, user_id, text):
+        """Четвертая стадия - получено новое значение для пункта меню.
+        Обработчик так называемого свободного текста,
+        только в сервисном режиме (получено только от администратора).
+        Проверяет, наличе сохраненных значений пункта меню и
+        селектора (Заголовок или информация), ввод секретного слова,
+        и что команда поступила от администратора.
+        """
+        if (
+            user_id == self.__admin_id
+            and self.__menu_edit_mode
+            and self.__current_edit_menu_index is not None
+            and self.__current_edit_selector is not None
+        ):
+            if self.__is_text_valid(text):
+                labels = self.__menu.get_menu_labels()
+                menu_index = int(self.__current_edit_menu_index)
+                # Из словаря по ключу - селектору, извлекается метод
+                # редактирования (для заголовка или информации)
+                self.__edit_functions.get(self.__current_edit_selector)(
+                    labels[menu_index], text.strip()
+                )
+                self.__send_message(user_id, EDIT_SUCCESS_MESSAGE)
+                # Обновляем словарь команд для режима чтения
+                self.__cmd_answ = get_commands_dict(self.__menu)
+            else:
+                self.__send_message(user_id, EMPTY_VALUE_MASSAGE)
+            self.__is_current_command_handled = True
+        # Если ввод текста не соответсвует текущей стадии режима
+        # редактирования, или поступили смешанные команды, то
+        # сброс параметров редактирования
+        self.__drop_edit_values()
+
+    def __cancel_from_edit_mode_handler(self, **kwargs):
+        """Обработчик команды отмены редактирования.
+        Cбрасывает сохраненные параметры режима редактирования меню.
+        Выводит сообщение об отмене операции, если бот
+        находился в режиме редактирования меню."""
+        user_id = kwargs.get(USER_ID)
+        if (
+            self.__menu_edit_mode
+            or self.__current_edit_menu_index is not None
+            or self.__current_edit_selector is not None
+        ):
+            self.__send_message(user_id=user_id, message_text=ABORT_MASSAGE)
+            self.__is_current_command_handled = True
+        self.__drop_edit_values()
+
+    def __backward_in_edit_mode_handler(self, **kwargs):
+        """Обработчик команды Назад в режиме редактирования.
+        На стадии выбора селектора возвращает на стадию выбора пункта.
+        На вводе нового значения возвращает на стадию выбора селектора.
+        Сбрасывает соответсвующий параметр режима редактирования.
+        Вызывает обработчик с восстановленными аргументами.
+        В случае несоответсвия параметров режима редактирования,
+        сбрасывает их.
+        """
+        user_id = kwargs.get(USER_ID)
+        # Если бот на третьей стадии - выбран селектор,
+        # ожидается ввод нового значения.
+        if (
+            user_id == self.__admin_id
+            and self.__menu_edit_mode
+            and self.__current_edit_menu_index is not None
+            and self.__current_edit_selector is not None
+        ):
+            self.__current_edit_selector = None
+            self.__recive_menu_item_to_edit_handler(
+                user_id=user_id,
+                text=EDIT_MODE_ITEM_TEMPLATE.format(
+                    self.__current_edit_menu_index
+                ),
+            )
+            self.__is_current_command_handled = True
+        # Если бот на второй стадии - выбран пункт меню для редактирования,
+        # ожидается ввод селектора.
+        elif (
+            user_id == self.__admin_id
+            and self.__menu_edit_mode
+            and self.__current_edit_menu_index is not None
+        ):
+            self.__current_edit_menu_index = None
+            self.__recive_edit_menu_keyword_handler(
+                user_id=user_id, text=self.__menu_edit_key_word
+            )
+            self.__is_current_command_handled = True
+        # Если бот на первой стадии - введено секретное слово,
+        # ожидается выбор пункта меню, и в остальных случаях.
+        else:
+            self.__drop_edit_values()
+            # self.__is_current_command_handled = True
+
+    def __is_text_valid(self, text: str) -> bool:
+        """Проверяет, что текст сообщения не None,
+        не пуст и не состоит только из пробелов."""
+        return text is not None and text.strip() != ""
