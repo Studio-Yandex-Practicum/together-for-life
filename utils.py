@@ -1,4 +1,9 @@
-"""Модуль класса реализации чтения и записи файла csv."""
+"""
+Модуль утилит проекта:
+MenuManager - формирования меню кнопок и их сообщений
+collect_keyboard - получение клавиатуры
+get_commands_dict - получения словаря комманд
+"""
 
 import csv
 import logging
@@ -7,7 +12,18 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from constants import ENCODING, MENU_FILE_NAME, MENU_FOLDER
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+
+from constants import (
+    ENCODING,
+    MENU_FILE_NAME,
+    MENU_FOLDER,
+    MAX_BUTONS,
+    TO_ADMIN_DONAT,
+    TO_USER_DONAT,
+    TO_ADMIN_OTHER,
+    TO_USER_OTHER,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -108,3 +124,35 @@ class MenuManager:
                 row[self.__key_label] = label
                 row[self.__key_message] = message
         self.__write_file()
+
+
+def collect_keyboard(
+    buttons, one_time=False, inline=False, color=VkKeyboardColor.POSITIVE
+):
+    """Функция создания клавиатуры."""
+    keyboard = VkKeyboard(one_time=one_time, inline=inline)
+    count_buttons = 0
+    for button in buttons:
+        keyboard.add_button(str(button), color=color)
+        count_buttons += 1
+        if count_buttons % MAX_BUTONS == 0:
+            keyboard.add_line()
+    return keyboard.get_keyboard()
+
+
+def get_commands_dict(menu: MenuManager):
+    """Функция получения словаря комманд."""
+    keyboard_start = collect_keyboard(["Меню"])
+    keyboard_menu = collect_keyboard(
+        [name for name in range(1, len(menu.get_menu_labels()))]
+    )
+    keyboard_back = collect_keyboard(["Назад"])
+    return dict(
+        (
+            ("Начать", (menu.get_message_by_index("0"), keyboard_start)),
+            ("Меню", (menu.get_preview_menu_labels(), keyboard_menu)),
+            ("Назад", (menu.get_preview_menu_labels(), keyboard_menu)),
+            ("6_for_adm", ((TO_ADMIN_DONAT, TO_USER_DONAT), keyboard_back)),
+            ("7_for_adm", ((TO_ADMIN_OTHER, TO_USER_OTHER), keyboard_back)),
+        )
+    )
