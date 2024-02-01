@@ -21,7 +21,7 @@ from constants import (
     NUMBERED_LABEL_TEMPLATE,
     SELECTED_MENU_ITEM_TEMPLATE,
 )
-from utils import MenuManager
+from utils import collect_keyboard, get_commands_dict, MenuManager
 
 ONE = 1
 USER_ID = "user_id"
@@ -59,6 +59,8 @@ class VKBot:
         self.__make_service_command_book()
         # Сигнальный аттрибут, обработана текущая команда или нет.
         self.__is_current_command_handled = False
+        self.__templ_date = dict()
+        self.__cmd_answ = get_commands_dict(menu)
 
     def __make_service_command_book(self):
         """Составляет словарь команд режима редактирования меню для бота.
@@ -87,6 +89,7 @@ class VKBot:
                 EDIT_MODE_ITEM_TEMPLATE.format(number)
             ] = self.__recive_menu_item_to_edit_handler
 
+
     def vkbot_up(self):
         """Метод запуска бота."""
         logger.debug("Запуск Бота.")
@@ -96,17 +99,41 @@ class VKBot:
 
     def __message_handler(self, event):
         """Метод разбора события новое сообщение."""
-        logger.debug(
-            f"От пользователя {event.user_id} получено сообщение: {event.text}"
-        )
+        user_id, text = event.user_id, event.text
+        logger.debug(f"От пользователя {user_id} получено сообщение: {text}")
         # Точка входа для обработки сообщений редактирования меню
-        self.__check_for_edit_menu_events(event.user_id, event.text)
+        self.__check_for_edit_menu_events(user_id, text)
         # Если команда не обработана в блоке режима редактирования,
         # то продолжить обработку в блоке чтения меню.
         if not self.__is_current_command_handled:
             # Здесь обработка команд для чтения меню.
-            pass
+            if self.__cmd_answ.get(text) is not None:
+                self.__send_message(user_id, *self.__cmd_answ.get(text))
+            elif self.__menu.get_message_by_index(text) is not None:
+                self.__send_message(
+                    user_id,
+                    self.__menu.get_message_by_index(text),
+                    collect_keyboard(["Назад"]),
+                )
+                self.__check_for_service_event(user_id, text)
+            elif user_id in self.__templ_date:
+                (massege_admin, massege_user), keyboard = self.__cmd_answ.get(
+                    self.__templ_date.get(user_id)
+                )
+                self.__send_message(
+                    self.__admin_id, massege_admin.format(user_id, text)
+                )
+                self.__send_message(user_id, massege_user, keyboard)
+                self.__templ_date.pop(user_id)
+            else:
+                self.__send_message(user_id, *self.__cmd_answ("Начать"))
+          
         self.__is_current_command_handled = False
+
+    def __check_for_service_event(self, user_id, text):
+        """Метод проверки события, и записи в словарь."""
+        if text in ["6", "7"]:
+            self.__templ_date.setdefault(user_id, text + "_for_adm")
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
