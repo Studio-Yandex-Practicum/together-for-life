@@ -129,9 +129,8 @@ def collect_keyboard(
     return keyboard.get_keyboard()
 
 
-def get_commands_dict():
+def get_commands_dict(menu: MenuManager):
     """Функция получения словаря комманд."""
-    menu = MenuManager()
     keyboard_start = collect_keyboard(["Меню"])
     keyboard_menu = collect_keyboard(
         [name for name in range(1, len(menu.get_menu_labels()))]

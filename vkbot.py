@@ -8,7 +8,6 @@ from constants import CHECKING_UNIQUE
 from utils import collect_keyboard, get_commands_dict, MenuManager
 
 logger = logging.getLogger(__name__)
-cmd_answ = get_commands_dict()
 
 
 class VKBot:
@@ -18,8 +17,9 @@ class VKBot:
         """Метод инициализации."""
         self.__vk_session = vk_api.VkApi(token=vk_token)
         self.__admin_id = int(vk_admin_user_id)
-        self.__template_date = dict()
+        self.__templ_date = dict()
         self.__menu = menu
+        self.__cmd_answ = get_commands_dict(menu)
 
     def vkbot_up(self):
         """Метод запуска бота."""
@@ -33,8 +33,8 @@ class VKBot:
         user_id, text = event.user_id, event.text
         logger.debug(f"От пользователя {user_id} получено сообщение: {text}")
 
-        if cmd_answ.get(text) is not None:
-            self.__send_message(user_id, *cmd_answ.get(text))
+        if self.__cmd_answ.get(text) is not None:
+            self.__send_message(user_id, *self.__cmd_answ.get(text))
         elif self.__menu.get_message_by_index(text) is not None:
             self.__send_message(
                 user_id,
@@ -42,22 +42,22 @@ class VKBot:
                 collect_keyboard(["Назад"]),
             )
             self.__check_for_service_event(user_id, text)
-        elif user_id in self.__template_date:
-            (massege_to_admin, masege_to_user), keyboard = cmd_answ.get(
-                self.__template_date.get(user_id)
+        elif user_id in self.__templ_date:
+            (massege_admin, massege_user), keyboard = self.__cmd_answ.get(
+                self.__templ_date.get(user_id)
             )
             self.__send_message(
-                self.__admin_id, massege_to_admin.format(user_id, text)
+                self.__admin_id, massege_admin.format(user_id, text)
             )
-            self.__send_message(user_id, masege_to_user, keyboard)
-            self.__template_date.pop(user_id)
+            self.__send_message(user_id, massege_user, keyboard)
+            self.__templ_date.pop(user_id)
         else:
-            self.__send_message(user_id, *cmd_answ.get("Начать"))
+            self.__send_message(user_id, *self.__cmd_answ("Начать"))
 
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
-            self.__template_date.setdefault(user_id, text + "_for_adm")
+            self.__templ_date.setdefault(user_id, text + "_for_adm")
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
