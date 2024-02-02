@@ -3,6 +3,7 @@
 
 import logging
 import os
+from typing import Dict
 
 import vk_api
 from vk_api.keyboard import MAX_BUTTONS_ON_LINE, VkKeyboard, VkKeyboardColor
@@ -59,7 +60,7 @@ class VKBot:
         self.__make_service_command_book()
         # Сигнальный аттрибут, обработана текущая команда или нет.
         self.__is_current_command_handled = False
-        self.__templ_date = dict()
+        self.__temp_data: Dict[int, str] = {}
         self.__cmd_answ = get_commands_dict(self.__menu)
 
     def __make_service_command_book(self):
@@ -118,15 +119,15 @@ class VKBot:
                     collect_keyboard(["Назад"]),
                 )
                 self.__check_for_service_event(user_id, text)
-            elif user_id in self.__templ_date:
+            elif user_id in self.__temp_data:
                 (message_admin, message_user), keyboard = self.__cmd_answ.get(
-                    self.__templ_date.get(user_id)
+                    self.__temp_data.get(user_id)
                 )
                 self.__send_message(
                     self.__admin_id, message_admin.format(user_id, text)
                 )
                 self.__send_message(user_id, message_user, keyboard)
-                self.__templ_date.pop(user_id)
+                self.__temp_data.pop(user_id)
             else:
                 self.__send_message(user_id, *self.__cmd_answ("Начать"))
         self.__is_current_command_handled = False
@@ -134,7 +135,7 @@ class VKBot:
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
-            self.__templ_date.setdefault(user_id, text + "_for_adm")
+            self.__temp_data.setdefault(user_id, text + "_for_adm")
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
@@ -350,7 +351,7 @@ class VKBot:
 
     def __cancel_from_edit_mode_handler(self, **kwargs):
         """Обработчик команды отмены редактирования.
-        Cбрасывает сохраненные параметры режима редактирования меню.
+        Сбрасывает сохраненные параметры режима редактирования меню.
         Выводит сообщение об отмене операции, если бот
         находился в режиме редактирования меню."""
         user_id = kwargs.get(USER_ID)
