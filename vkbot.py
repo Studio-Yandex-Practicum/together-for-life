@@ -129,7 +129,7 @@ class VKBot:
                 self.__send_message(user_id, message_user, keyboard)
                 self.__temp_data.pop(user_id)
             else:
-                self.__send_message(user_id, *self.__cmd_answ("Начать"))
+                self.__send_message(user_id, *self.__cmd_answ["Начать"])
         self.__is_current_command_handled = False
 
     def __check_for_service_event(self, user_id, text):
