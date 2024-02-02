@@ -3,19 +3,20 @@
 
 import logging
 import os
+from typing import Dict
 
 import vk_api
 from vk_api.keyboard import MAX_BUTTONS_ON_LINE, VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkEventType, VkLongPoll
 
 from constants import (
-    ABORT_MASSAGE,
+    ABORT_MESSAGE,
     BACKWARD_BUTTON_LABEL,
     CANCEL_BUTTON_LABEL,
     CHECKING_UNIQUE,
     EDIT_MODE_ITEM_TEMPLATE,
     EDIT_SUCCESS_MESSAGE,
-    EMPTY_VALUE_MASSAGE,
+    EMPTY_VALUE_MESSAGE,
     INLINE_KEYBOARD,
     NEW_VALUE_QUESTION_TEMPLATE,
     NUMBERED_LABEL_TEMPLATE,
@@ -48,7 +49,7 @@ class VKBot:
         self.__current_edit_selector = None
         # Словарь функций редактирования меню,
         # используется совместно с селектором
-        # в обработчике __recive_new_value_handler
+        # в обработчике __receive_new_value_handler
         self.__edit_functions = dict(
             (
                 (self.__menu.key_label, self.__menu.edit_label),
@@ -59,7 +60,7 @@ class VKBot:
         self.__make_service_command_book()
         # Сигнальный аттрибут, обработана текущая команда или нет.
         self.__is_current_command_handled = False
-        self.__templ_date = dict()
+        self.__temp_data: Dict[int, str] = {}
         self.__cmd_answ = get_commands_dict(self.__menu)
 
     def __make_service_command_book(self):
@@ -72,11 +73,14 @@ class VKBot:
                 # Команда редактирования меню
                 (
                     self.__menu_edit_key_word,
-                    self.__recive_edit_menu_keyword_handler,
+                    self.__receive_edit_menu_keyword_handler,
                 ),
                 # Команды для селектора (заголовок или информация)
-                (self.__menu.key_label, self.__recive_edit_selector_handler),
-                (self.__menu.key_message, self.__recive_edit_selector_handler),
+                (self.__menu.key_label, self.__receive_edit_selector_handler),
+                (
+                    self.__menu.key_message,
+                    self.__receive_edit_selector_handler,
+                ),
                 # Команда отмены
                 (CANCEL_BUTTON_LABEL, self.__cancel_from_edit_mode_handler),
                 # Команда назад
@@ -87,7 +91,7 @@ class VKBot:
         for number in range(len(labels)):
             self.__service_command_book[
                 EDIT_MODE_ITEM_TEMPLATE.format(number)
-            ] = self.__recive_menu_item_to_edit_handler
+            ] = self.__receive_menu_item_to_edit_handler
 
     def vkbot_up(self):
         """Метод запуска бота."""
@@ -115,15 +119,15 @@ class VKBot:
                     collect_keyboard(["Назад"]),
                 )
                 self.__check_for_service_event(user_id, text)
-            elif user_id in self.__templ_date:
-                (massege_admin, massege_user), keyboard = self.__cmd_answ.get(
-                    self.__templ_date.get(user_id)
+            elif user_id in self.__temp_data:
+                (message_admin, message_user), keyboard = self.__cmd_answ.get(
+                    self.__temp_data.get(user_id)
                 )
                 self.__send_message(
-                    self.__admin_id, massege_admin.format(user_id, text)
+                    self.__admin_id, message_admin.format(user_id, text)
                 )
-                self.__send_message(user_id, massege_user, keyboard)
-                self.__templ_date.pop(user_id)
+                self.__send_message(user_id, message_user, keyboard)
+                self.__temp_data.pop(user_id)
             else:
                 self.__send_message(user_id, *self.__cmd_answ("Начать"))
         self.__is_current_command_handled = False
@@ -131,7 +135,7 @@ class VKBot:
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
-            self.__templ_date.setdefault(user_id, text + "_for_adm")
+            self.__temp_data.setdefault(user_id, text + "_for_adm")
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
@@ -203,8 +207,8 @@ class VKBot:
         режим редактирования меню устанавливает в False.
         Вызывается, также в случаях когда, в обработчиках
         не получены ожидаемые значения или поступили смешанные
-        команды, не соотвествующие текущим значения параметров
-        режима реактирования.
+        команды, не соответствующие текущим значения параметров
+        режима редактирования.
         """
         self.__current_edit_menu_index = None
         self.__current_edit_selector = None
@@ -218,15 +222,15 @@ class VKBot:
         аргументов user_id и text.
         По команде в text из словаря извлекается метод-обработчик,
         в него передаются user_id и поступивший text.
-        Если подходящей команды в словаре нет, вызвается метовд
-        self.__recive_new_value_handler, он обрабатывает свободный текст.
+        Если подходящей команды в словаре нет, вызывается метод
+        self.__receive_new_value_handler, он обрабатывает свободный текст.
         """
         if user_id == self.__admin_id and text is not None:
             self.__service_command_book.get(
-                text, self.__recive_new_value_handler
+                text, self.__receive_new_value_handler
             )(user_id=user_id, text=text)
 
-    def __recive_edit_menu_keyword_handler(self, **kwargs):
+    def __receive_edit_menu_keyword_handler(self, **kwargs):
         """Первая стадия редактирования - получено секретное слово.
         Обработчик сообщения команды редактирования меню.
         Выводит меню, включая стартовое сообщение, и нумерованные
@@ -250,14 +254,14 @@ class VKBot:
         self.__menu_edit_mode = True
         self.__is_current_command_handled = True
 
-    def __recive_menu_item_to_edit_handler(self, user_id, text):
+    def __receive_menu_item_to_edit_handler(self, user_id, text):
         """Вторая стадия режима редактирования - выбран пункт меню.
         Обработчик для команды выбора пункта меню в режиме редактирования.
         Обрабатывает команды, вида E0,...,E7.
         Полученную команду сохраняет в self.__current_edit_menu_index.
         Выводит выбранный пункт меню включая заголовок с вопросом,
         что именно нужно редактировать, заголовок или информацию
-        выводит соответсвующие кнопки.
+        выводит соответствующие кнопки.
         """
         # Проверяется, что ранее было получено секретное слово.
         if self.__menu_edit_mode:
@@ -273,7 +277,7 @@ class VKBot:
             )
 
             # Выводим пункт меню и информацию
-            # Кнопки селетора редактирования (заголовок или информация)
+            # Кнопки селектора редактирования (заголовок или информация)
             self.__send_message(
                 user_id=user_id,
                 message_text=message,
@@ -281,14 +285,14 @@ class VKBot:
             )
             self.__is_current_command_handled = True
         else:
-            # Если ранее серетного слова не было, но поступила команда
+            # Если ранее секретного слова не было, но поступила команда
             # с пунктом меню в формате редактирования - сброс параметров
             # редактирования
             self.__drop_edit_values()
 
-    def __recive_edit_selector_handler(self, user_id, text):
+    def __receive_edit_selector_handler(self, user_id, text):
         """Третья стадия - выбрано, что редактировать
-        (Заголовок или Информацияю).
+        (Заголовок или Информация).
         Обрабатывает сообщение с командой, что именно нужно
         редактировать, заголовок или информацию, в выбранном ранее
         пункте меню.
@@ -312,7 +316,7 @@ class VKBot:
             # параметров редактирования.
             self.__drop_edit_values()
 
-    def __recive_new_value_handler(self, user_id, text):
+    def __receive_new_value_handler(self, user_id, text):
         """Четвертая стадия - получено новое значение для пункта меню.
         Обработчик так называемого свободного текста,
         только в сервисном режиме (получено только от администратора).
@@ -338,16 +342,16 @@ class VKBot:
                 # Обновляем словарь команд для режима чтения
                 self.__cmd_answ = get_commands_dict(self.__menu)
             else:
-                self.__send_message(user_id, EMPTY_VALUE_MASSAGE)
+                self.__send_message(user_id, EMPTY_VALUE_MESSAGE)
             self.__is_current_command_handled = True
-        # Если ввод текста не соответсвует текущей стадии режима
+        # Если ввод текста не соответствует текущей стадии режима
         # редактирования, или поступили смешанные команды, то
         # сброс параметров редактирования
         self.__drop_edit_values()
 
     def __cancel_from_edit_mode_handler(self, **kwargs):
         """Обработчик команды отмены редактирования.
-        Cбрасывает сохраненные параметры режима редактирования меню.
+        Сбрасывает сохраненные параметры режима редактирования меню.
         Выводит сообщение об отмене операции, если бот
         находился в режиме редактирования меню."""
         user_id = kwargs.get(USER_ID)
@@ -356,7 +360,7 @@ class VKBot:
             or self.__current_edit_menu_index is not None
             or self.__current_edit_selector is not None
         ):
-            self.__send_message(user_id=user_id, message_text=ABORT_MASSAGE)
+            self.__send_message(user_id=user_id, message_text=ABORT_MESSAGE)
             self.__is_current_command_handled = True
         self.__drop_edit_values()
 
@@ -364,9 +368,9 @@ class VKBot:
         """Обработчик команды Назад в режиме редактирования.
         На стадии выбора селектора возвращает на стадию выбора пункта.
         На вводе нового значения возвращает на стадию выбора селектора.
-        Сбрасывает соответсвующий параметр режима редактирования.
+        Сбрасывает соответствующий параметр режима редактирования.
         Вызывает обработчик с восстановленными аргументами.
-        В случае несоответсвия параметров режима редактирования,
+        В случае несоответствия параметров режима редактирования,
         сбрасывает их.
         """
         user_id = kwargs.get(USER_ID)
@@ -379,7 +383,7 @@ class VKBot:
             and self.__current_edit_selector is not None
         ):
             self.__current_edit_selector = None
-            self.__recive_menu_item_to_edit_handler(
+            self.__receive_menu_item_to_edit_handler(
                 user_id=user_id,
                 text=EDIT_MODE_ITEM_TEMPLATE.format(
                     self.__current_edit_menu_index
@@ -394,7 +398,7 @@ class VKBot:
             and self.__current_edit_menu_index is not None
         ):
             self.__current_edit_menu_index = None
-            self.__recive_edit_menu_keyword_handler(
+            self.__receive_edit_menu_keyword_handler(
                 user_id=user_id, text=self.__menu_edit_key_word
             )
             self.__is_current_command_handled = True

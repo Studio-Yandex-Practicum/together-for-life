@@ -1,4 +1,4 @@
-"""Модуль инициализации глобальных натсроек логера."""
+"""Модуль инициализации глобальных настроек логгера."""
 
 import logging
 import os
@@ -18,7 +18,7 @@ from constants import (
 
 
 def init_globals_logging():
-    """Инициализация глобальных натсроек логера."""
+    """Инициализация глобальных настроек логгера."""
     os.makedirs(LOGS_FOLDER, exist_ok=True)
     logging.basicConfig(
         level=getattr(logging, LOGGING_LEVEL, "DEBUG"),

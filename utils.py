@@ -2,7 +2,7 @@
 Модуль утилит проекта:
 MenuManager - формирования меню кнопок и их сообщений
 collect_keyboard - получение клавиатуры
-get_commands_dict - получения словаря комманд
+get_commands_dict - получения словаря команд
 """
 
 import csv
@@ -18,7 +18,7 @@ from constants import (
     ENCODING,
     MENU_FILE_NAME,
     MENU_FOLDER,
-    MAX_BUTONS,
+    MAX_BUTTONS,
     TO_ADMIN_DONAT,
     TO_USER_DONAT,
     TO_ADMIN_OTHER,
@@ -121,8 +121,8 @@ class MenuManager:
         """
         for row in self.__menu:
             if self.__menu.index(row) == int(button_index):
-                row[self.__key_label] = label
-                row[self.__key_message] = message
+                row[self.key_label] = label
+                row[self.key_message] = message
         self.__write_file()
 
 
@@ -135,13 +135,13 @@ def collect_keyboard(
     for button in buttons:
         keyboard.add_button(str(button), color=color)
         count_buttons += 1
-        if count_buttons % MAX_BUTONS == 0:
+        if count_buttons % MAX_BUTTONS == 0:
             keyboard.add_line()
     return keyboard.get_keyboard()
 
 
 def get_commands_dict(menu: MenuManager):
-    """Функция получения словаря комманд."""
+    """Функция получения словаря команд."""
     keyboard_start = collect_keyboard(["Меню"])
     keyboard_menu = collect_keyboard(
         [name for name in range(1, len(menu.get_menu_labels()))]
