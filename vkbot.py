@@ -141,6 +141,7 @@ class VKBot:
             self.__temp_data.setdefault(user_id, text + "_for_adm")
 
     def __get_user_name(self, user_id):
+        """Метод получения данных пользователя по id."""
         user_info = self.__vk_session.method(
             "users.get", {"user_ids": user_id}
         )
