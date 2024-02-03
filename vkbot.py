@@ -18,9 +18,11 @@ from constants import (
     EDIT_SUCCESS_MESSAGE,
     EMPTY_VALUE_MESSAGE,
     INLINE_KEYBOARD,
+    MENU_BUTTON_LABEL,
     NEW_VALUE_QUESTION_TEMPLATE,
     NUMBERED_LABEL_TEMPLATE,
     SELECTED_MENU_ITEM_TEMPLATE,
+    START_BUTTON_LABEL,
 )
 from utils import collect_keyboard, get_commands_dict, MenuManager
 
@@ -109,33 +111,38 @@ class VKBot:
         # Если команда не обработана в блоке режима редактирования,
         # то продолжить обработку в блоке чтения меню.
         if not self.__is_current_command_handled:
-            # Здесь обработка команд для чтения меню.
-            if self.__cmd_answ.get(text) is not None:
-                self.__send_message(user_id, *self.__cmd_answ.get(text))
-            elif self.__menu.get_message_by_index(text) is not None:
-                self.__send_message(
-                    user_id,
-                    self.__menu.get_message_by_index(text),
-                    collect_keyboard(["Назад"]),
-                )
-                self.__check_for_service_event(user_id, text)
-            elif user_id in self.__temp_data:
-                (message_admin, message_user), keyboard = self.__cmd_answ.get(
-                    self.__temp_data.get(user_id)
-                )
-                self.__send_message(
-                    self.__admin_id, message_admin.format(user_id, text)
-                )
-                self.__send_message(user_id, message_user, keyboard)
-                self.__temp_data.pop(user_id)
-            else:
-                self.__send_message(user_id, *self.__cmd_answ["Начать"])
+            # Точка входа для обработки сообщений чтения меню
+            self.__read_menu_handler(user_id, text)
         self.__is_current_command_handled = False
 
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
             self.__temp_data.setdefault(user_id, text + "_for_adm")
+
+    def __read_menu_handler(self, user_id, text):
+        """Обработка команд для чтения меню."""
+        if self.__cmd_answ.get(text) is not None:
+            self.__send_message(user_id, *self.__cmd_answ.get(text))
+        elif self.__menu.get_message_by_index(text) is not None:
+            self.__send_message(
+                user_id,
+                self.__menu.get_message_by_index(text),
+                collect_keyboard([BACKWARD_BUTTON_LABEL]),
+            )
+            self.__check_for_service_event(user_id, text)
+        elif user_id in self.__temp_data:
+            (message_admin, message_user), keyboard = self.__cmd_answ.get(
+                self.__temp_data.get(user_id)
+            )
+            self.__send_message(
+                self.__admin_id, message_admin.format(user_id, text)
+            )
+            self.__send_message(user_id, message_user, keyboard)
+            self.__temp_data.pop(user_id)
+        else:
+            self.__send_message(user_id, *self.__cmd_answ[START_BUTTON_LABEL])
+            self.__send_message(user_id, *self.__cmd_answ[MENU_BUTTON_LABEL])
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
