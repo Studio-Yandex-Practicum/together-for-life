@@ -42,7 +42,7 @@ SELECTED_MENU_ITEM_TEMPLATE = "".join(
 
 CANCEL_BUTTON_LABEL = "Отмена"
 BACKWARD_BUTTON_LABEL = "Назад"
-NEW_VALUE_QUESTION_TEMPLATE = "".join(
+QUESTION_FOR_NEW_VALUE_TEMPLATE = "".join(
     (
         'Введите новое значение для "{}" пункта меню № {} ',
         'или нажмите кнопку "Отмена"',

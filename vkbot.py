@@ -22,7 +22,7 @@ from constants import (
     EMPTY_VALUE_MESSAGE,
     INLINE_KEYBOARD,
     MENU_EDIT_ENV_KEY,
-    NEW_VALUE_QUESTION_TEMPLATE,
+    QUESTION_FOR_NEW_VALUE_TEMPLATE,
     NEW_VALUE_REGEXP,
     SELECTED_MENU_ITEM_TEMPLATE,
     START_BUTTON_LABEL,
@@ -346,7 +346,7 @@ class VKBot:
         """
         if self.__menu_edit_mode and self.__current_edit_menu_index:
             self.__current_edit_selector = text
-            message = NEW_VALUE_QUESTION_TEMPLATE.format(
+            message = QUESTION_FOR_NEW_VALUE_TEMPLATE.format(
                 text, self.__current_edit_menu_index
             )
             self.__send_message(
