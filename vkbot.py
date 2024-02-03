@@ -161,6 +161,11 @@ class VKBot:
         if text in ["6", "7"]:
             self.__temp_data.setdefault(user_id, text + "_for_adm")
 
+    def __read_menu_handler(self, user_id, text):
+        """Обработка команд для чтения меню."""
+        # Заглушка для PR #36
+        pass
+
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
         try:
@@ -235,24 +240,27 @@ class VKBot:
         self.__add_backward_button(keyboard)
         return keyboard.get_keyboard()
 
-    def __get_start_keyboard_json(self):
-        keyboard = self.__get_VK_keyboard()
-        keyboard.add_button(START_BUTTON_LABEL)
-        return keyboard.get_keyboard()
-
-    def __drop_edit_values(self):
+    def __drop_edit_values(self, user_id_for_start=None):
         """Задает значения None для сохраненных
         для редактирования пункта меню и селектора
         (заголовок или информация),
-        режим редактирования меню устанавливает в False.
+        режим редактирования меню устанавливает в False,
+        текущее новое значение устанавливает равным None.
         Вызывается, также в случаях когда, в обработчиках
         не получены ожидаемые значения или поступили смешанные
         команды, не соответствующие текущим значения параметров
         режима редактирования.
+        В случае если задан необязательный аргумент user_id_for_start
+        вызывает обработчик команд чтения меню с командой Начать.
         """
         self.__current_edit_menu_index = None
         self.__current_edit_selector = None
         self.__menu_edit_mode = False
+        self.__current_new_value = None
+        if user_id_for_start is not None:
+            self.__read_menu_handler(user_id_for_start, START_BUTTON_LABEL)
+            # После PR # 36 раскомментировать
+            # self.__is_current_command_handled = True
 
     def __check_for_edit_menu_events(self, user_id, text):
         """Метод проверяет, что сообщение от администратора группы.
@@ -322,7 +330,7 @@ class VKBot:
             # Если ранее секретного слова не было, но поступила команда
             # с пунктом меню в формате редактирования - сброс параметров
             # редактирования.
-            self.__drop_edit_values()
+            self.__drop_edit_values(user_id)
 
     def __receive_edit_selector_handler(self, user_id, text):
         """Третья стадия - выбрано, что редактировать
@@ -350,7 +358,9 @@ class VKBot:
         else:
             # При поступлении смешанных команд - сброс
             # параметров редактирования.
-            self.__drop_edit_values()
+            self.__drop_edit_values(user_id)
+            # После PR 36 удалить self.__is_current_command_handled = False
+            self.__is_current_command_handled = False
 
     def __receive_new_value_handler(self, user_id, text):
         """Четвертая стадия - получено новое значение для пункта меню.
@@ -398,7 +408,8 @@ class VKBot:
             # Если ввод текста не соответствует текущей стадии режима
             # редактирования, или поступили смешанные команды, то
             # сброс параметров редактирования. Команда не обработана.
-            self.__drop_edit_values()
+            self.__drop_edit_values(user_id)
+            # После PR 36 удалить self.__is_current_command_handled = False
             self.__is_current_command_handled = False
 
     def __cancel_from_edit_mode_handler(self, **kwargs):
@@ -411,14 +422,15 @@ class VKBot:
             self.__menu_edit_mode
             or self.__current_edit_menu_index is not None
             or self.__current_edit_selector is not None
+            or self.__current_new_value is not None
         ):
             self.__send_message(
                 user_id=user_id,
                 message_text=ABORT_MESSAGE,
-                keyboard=self.__get_start_keyboard_json(),
             )
-            self.__is_current_command_handled = True
-        self.__drop_edit_values()
+        self.__drop_edit_values(user_id)
+        # После PR 36 удалить self.__is_current_command_handled = True
+        self.__is_current_command_handled = True
 
     def __backward_in_edit_mode_handler(self, **kwargs):
         """Обработчик команды Назад в режиме редактирования.
@@ -474,8 +486,7 @@ class VKBot:
         # Если бот на первой стадии - введено секретное слово,
         # ожидается выбор пункта меню, и в остальных случаях.
         else:
-            self.__drop_edit_values()
-            # self.__is_current_command_handled = True
+            self.__drop_edit_values(user_id)
 
     def __is_text_valid(self, text: str) -> bool:
         """Проверяет, что текст сообщения не None,
@@ -509,13 +520,13 @@ class VKBot:
             self.__send_message(
                 user_id=user_id,
                 message_text=EDIT_SUCCESS_MESSAGE,
-                keyboard=self.__get_start_keyboard_json(),
             )
             # Обновляем словарь команд для режима чтения
             self.__cmd_answ = get_commands_dict(self.__menu)
             self.__is_current_command_handled = True
+        # После PR 36 блок else не нужен
         else:
             # Если поступили смешанные команды, то
             # команда не обработана
             self.__is_current_command_handled = False
-        self.__drop_edit_values()
+        self.__drop_edit_values(user_id)
