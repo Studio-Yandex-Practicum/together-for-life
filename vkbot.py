@@ -57,7 +57,7 @@ class VKBot:
         # Словарь функций редактирования меню,
         # используется совместно с селектором
         # в обработчике __receive_new_value_handler
-        self.__edit_functions = dict(
+        self.__edit_functions_book = dict(
             (
                 (self.__menu.key_label, self.__menu.edit_label),
                 (self.__menu.key_message, self.__menu.edit_message),
@@ -66,7 +66,7 @@ class VKBot:
         # Словарь функций чтения элементов меню,
         # используется совместно с селектором
         # в обработчике __receive_new_value_handler
-        self.__get_menu_item_functions = dict(
+        self.__get_menu_item_functions_book = dict(
             (
                 (self.__menu.key_label, self.__menu.get_label_by_index),
                 (self.__menu.key_message, self.__menu.get_message_by_index),
@@ -276,11 +276,12 @@ class VKBot:
         Выводит меню, включая стартовое сообщение, и нумерованные
         кнопки с префиксом для режима редактирования."""
         user_id = kwargs.get(USER_ID)
-        labels = self.__menu.get_menu_labels()
         self.__send_message(
             user_id=user_id,
             message_text=self.__menu.get_preview_menu_labels(start_index=ZERO),
-            keyboard=self.__get_menu_items_to_edit_keyboard_json(len(labels)),
+            keyboard=self.__get_menu_items_to_edit_keyboard_json(
+                len(self.__menu.get_menu_labels())
+            ),
         )
         # Сброс параметров режима редактирования
         self.__drop_edit_values()
@@ -301,10 +302,9 @@ class VKBot:
         # Проверяется, что ранее было получено секретное слово.
         if self.__menu_edit_mode:
             self.__current_edit_menu_index = text[ONE:]
-            labels = self.__menu.get_menu_labels()
             message = SELECTED_MENU_ITEM_TEMPLATE.format(
                 self.__menu.key_label,
-                labels[int(self.__current_edit_menu_index)],
+                self.__menu.get_label_by_index(self.__current_edit_menu_index),
                 self.__menu.key_message,
                 self.__menu.get_message_by_index(
                     self.__current_edit_menu_index
@@ -372,7 +372,7 @@ class VKBot:
                 self.__current_new_value = text.strip()
                 # Из словаря по ключу - селектору, извлекается метод
                 # чтения (для заголовка или информации)
-                old_value = self.__get_menu_item_functions.get(
+                old_value = self.__get_menu_item_functions_book.get(
                     self.__current_edit_selector
                 )(self.__current_edit_menu_index)
                 message = CONFIRM_NEW_VALUE_TEMPLATE.format(
@@ -412,7 +412,11 @@ class VKBot:
             or self.__current_edit_menu_index is not None
             or self.__current_edit_selector is not None
         ):
-            self.__send_message(user_id=user_id, message_text=ABORT_MESSAGE)
+            self.__send_message(
+                user_id=user_id,
+                message_text=ABORT_MESSAGE,
+                keyboard=self.__get_start_keyboard_json(),
+            )
             self.__is_current_command_handled = True
         self.__drop_edit_values()
 
@@ -499,7 +503,7 @@ class VKBot:
             menu_index = int(self.__current_edit_menu_index)
             # Из словаря по ключу - селектору, извлекается метод
             # редактирования (для заголовка или информации)
-            self.__edit_functions.get(self.__current_edit_selector)(
+            self.__edit_functions_book.get(self.__current_edit_selector)(
                 labels[menu_index], self.__current_new_value.strip()
             )
             self.__send_message(
