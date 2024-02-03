@@ -68,6 +68,16 @@ class MenuManager:
                 return row.get(self.key_message, None)
         return None
 
+    def get_label_by_index(self, index: str) -> Optional[str]:
+        """
+        Возвращает заголовок пункта меню по индексу.
+        Если нет пункта с нужным индекс, возвращает None.
+        """
+        for row in self.__menu:
+            if index.isdigit() and self.__menu.index(row) == int(index):
+                return row.get(self.key_label, None)
+        return None
+
     def get_message_by_index(self, label: str) -> Optional[str]:
         """
         Возвращает сообщение для заданной кнопки по индексу.
@@ -78,10 +88,11 @@ class MenuManager:
                 return row.get(self.key_message, None)
         return None
 
-    def get_preview_menu_labels(self) -> str:
-        """Возвращает строку с описанием меню для кнопок"""
+    def get_preview_menu_labels(self, start_index: int = 1) -> str:
+        """Возвращает строку с описанием меню для кнопок.
+        Не обязательный аргумент start_index = 1."""
         preview = ""
-        for label in self.get_menu_labels()[1::]:
+        for label in self.get_menu_labels()[start_index::]:
             preview += f"{self.get_menu_labels().index(label)}. {label}\n"
         return preview
 
