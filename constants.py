@@ -65,11 +65,8 @@ CONFIRM_NEW_VALUE_TEMPLATE = "".join(
         "Для редактирования выбраны:\n{} пункта меню № {}.\n",
         'Сохранить изменение значения "{}" на "{}"?',
     )
-MENU_BUTTON_LABEL = "Меню"
-NEW_VALUE_QUESTION_TEMPLATE = "".join(
-    ("Введите новое значение для {} ", "или нажмите кнопку Отмена")
-
 )
+MENU_BUTTON_LABEL = "Меню"
 EDIT_SUCCESS_MESSAGE = "Пункт меню успешно обновлен."
 EMPTY_VALUE_MESSAGE = "Значение меню не может быть пустым."
 ABORT_MESSAGE = "Операция отменена."
