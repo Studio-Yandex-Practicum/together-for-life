@@ -54,10 +54,25 @@ SELECTED_MENU_ITEM_TEMPLATE = "".join(
 START_BUTTON_LABEL = "Начать"
 CANCEL_BUTTON_LABEL = "Отмена"
 BACKWARD_BUTTON_LABEL = "Назад"
-MENU_BUTTON_LABEL = "Меню"
-NEW_VALUE_QUESTION_TEMPLATE = "".join(
-    ("Введите новое значение для {} ", "или нажмите кнопку Отмена")
+QUESTION_FOR_NEW_VALUE_TEMPLATE = "".join(
+    (
+        'Введите новое значение для "{}" пункта меню № {} ',
+        'или нажмите кнопку "Отмена"',
+    )
 )
+CONFIRM_NEW_VALUE_TEMPLATE = "".join(
+    (
+        "Для редактирования выбраны:\n{} пункта меню № {}.\n",
+        'Сохранить изменение значения "{}" на "{}"?',
+    )
+)
+MENU_BUTTON_LABEL = "Меню"
 EDIT_SUCCESS_MESSAGE = "Пункт меню успешно обновлен."
 EMPTY_VALUE_MESSAGE = "Значение меню не может быть пустым."
 ABORT_MESSAGE = "Операция отменена."
+CONFIRM_BUTTON_LABEL = "Сохранить изменения"
+START_BUTTON_LABEL = "Начать"
+MENU_EDIT_ENV_KEY = "MENU_EDIT_KEY_WORD"
+# Регулярное выражение для проверки нового значения для пункта меню
+# Должно содержать как минимум одну букву.
+NEW_VALUE_REGEXP = r"[a-zA-Zа-яА-Я]+"
