@@ -17,6 +17,8 @@ CHECKING_UNIQUE = 0
 # 0 — проверка на уникальность не нужна.
 # Любое другое число в пределах int32 — проверка на уникальность нужна.
 MAX_BUTTONS = 4
+
+# Шаблоны сообщений для обработчиков команд чтения меню
 TO_ADMIN_DONAT = (
     "Получена обратная связь от пользователя {}\n"
     "Ссылка на профиль пользователя https://vk.com/id{}\n"
@@ -29,6 +31,7 @@ TO_ADMIN_OTHER = (
 )
 TO_USER_DONAT = "Благодарим за участие."
 TO_USER_OTHER = "Ваше обращение отправлено специалисту."
+PREVIEW_MENU_MESSAGE = "\n Выберите цифру пункта меню"
 
 # Константы проекта
 RELOAD_TIME = 15
@@ -48,8 +51,10 @@ SELECTED_MENU_ITEM_TEMPLATE = "".join(
     )
 )
 
+START_BUTTON_LABEL = "Начать"
 CANCEL_BUTTON_LABEL = "Отмена"
 BACKWARD_BUTTON_LABEL = "Назад"
+MENU_BUTTON_LABEL = "Меню"
 NEW_VALUE_QUESTION_TEMPLATE = "".join(
     ("Введите новое значение для {} ", "или нажмите кнопку Отмена")
 )
