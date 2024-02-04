@@ -142,10 +142,17 @@ class VKBot:
 
     def __get_user_name(self, user_id):
         """Метод получения данных пользователя по id."""
-        user_info = self.__vk_session.method(
-            "users.get", {"user_ids": user_id}
-        )
-        return user_info[0]["first_name"]
+        try:
+            user_info = self.__vk_session.method(
+                "users.get", {"user_ids": user_id}
+            )
+            if user_info[0]["first_name"] is not None:
+                return user_info[0]["first_name"]
+        except KeyError as error:
+            logger.error(f"Ошибка массива данных юзера: {error}")
+        except Exception as error:
+            logger.error(f"Ошибка получения данных юзера: {error}")
+        return user_id
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
