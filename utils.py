@@ -15,10 +15,14 @@ from typing import Optional
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from constants import (
+    BACKWARD_BUTTON_LABEL,
     ENCODING,
+    MENU_BUTTON_LABEL,
     MENU_FILE_NAME,
     MENU_FOLDER,
     MAX_BUTTONS,
+    PREVIEW_MENU_MESSAGE,
+    START_BUTTON_LABEL,
     TO_ADMIN_DONAT,
     TO_USER_DONAT,
     TO_ADMIN_OTHER,
@@ -94,6 +98,7 @@ class MenuManager:
         preview = ""
         for label in self.get_menu_labels()[start_index::]:
             preview += f"{self.get_menu_labels().index(label)}. {label}\n"
+        preview += PREVIEW_MENU_MESSAGE
         return preview
 
     def __write_file(self):
@@ -153,16 +158,25 @@ def collect_keyboard(
 
 def get_commands_dict(menu: MenuManager):
     """Функция получения словаря команд."""
-    keyboard_start = collect_keyboard(["Меню"])
+    keyboard_start = collect_keyboard([MENU_BUTTON_LABEL])
     keyboard_menu = collect_keyboard(
         [name for name in range(1, len(menu.get_menu_labels()))]
     )
-    keyboard_back = collect_keyboard(["Назад"])
+    keyboard_back = collect_keyboard([BACKWARD_BUTTON_LABEL])
     return dict(
         (
-            ("Начать", (menu.get_message_by_index("0"), keyboard_start)),
-            ("Меню", (menu.get_preview_menu_labels(), keyboard_menu)),
-            ("Назад", (menu.get_preview_menu_labels(), keyboard_menu)),
+            (
+                START_BUTTON_LABEL,
+                (menu.get_message_by_index("0"), keyboard_start),
+            ),
+            (
+                MENU_BUTTON_LABEL,
+                (menu.get_preview_menu_labels(), keyboard_menu),
+            ),
+            (
+                BACKWARD_BUTTON_LABEL,
+                (menu.get_preview_menu_labels(), keyboard_menu),
+            ),
             ("6_for_adm", ((TO_ADMIN_DONAT, TO_USER_DONAT), keyboard_back)),
             ("7_for_adm", ((TO_ADMIN_OTHER, TO_USER_OTHER), keyboard_back)),
         )

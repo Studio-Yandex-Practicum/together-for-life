@@ -24,6 +24,9 @@ from constants import (
     MENU_EDIT_ENV_KEY,
     QUESTION_FOR_NEW_VALUE_TEMPLATE,
     NEW_VALUE_REGEXP,
+
+    MENU_BUTTON_LABEL,
+
     SELECTED_MENU_ITEM_TEMPLATE,
     START_BUTTON_LABEL,
 )
@@ -133,27 +136,8 @@ class VKBot:
         # Если команда не обработана в блоке режима редактирования,
         # то продолжить обработку в блоке чтения меню.
         if not self.__is_current_command_handled:
-            # Здесь обработка команд для чтения меню.
-            if self.__cmd_answ.get(text) is not None:
-                self.__send_message(user_id, *self.__cmd_answ.get(text))
-            elif self.__menu.get_message_by_index(text) is not None:
-                self.__send_message(
-                    user_id,
-                    self.__menu.get_message_by_index(text),
-                    collect_keyboard(["Назад"]),
-                )
-                self.__check_for_service_event(user_id, text)
-            elif user_id in self.__temp_data:
-                (message_admin, message_user), keyboard = self.__cmd_answ.get(
-                    self.__temp_data.get(user_id)
-                )
-                self.__send_message(
-                    self.__admin_id, message_admin.format(user_id, text)
-                )
-                self.__send_message(user_id, message_user, keyboard)
-                self.__temp_data.pop(user_id)
-            else:
-                self.__send_message(user_id, *self.__cmd_answ["Начать"])
+            # Точка входа для обработки сообщений чтения меню
+            self.__read_menu_handler(user_id, text)
         self.__is_current_command_handled = False
 
     def __check_for_service_event(self, user_id, text):
@@ -163,8 +147,44 @@ class VKBot:
 
     def __read_menu_handler(self, user_id, text):
         """Обработка команд для чтения меню."""
-        # Заглушка для PR #36
-        pass
+        if self.__cmd_answ.get(text) is not None:
+            self.__send_message(user_id, *self.__cmd_answ.get(text))
+        elif self.__menu.get_message_by_index(text) is not None:
+            self.__send_message(
+                user_id,
+                self.__menu.get_message_by_index(text),
+                collect_keyboard([BACKWARD_BUTTON_LABEL]),
+            )
+            self.__check_for_service_event(user_id, text)
+        elif user_id in self.__temp_data:
+            (message_admin, message_user), keyboard = self.__cmd_answ.get(
+                self.__temp_data.get(user_id)
+            )
+            self.__send_message(
+                self.__admin_id,
+                message_admin.format(
+                    self.__get_user_name(user_id), user_id, text
+                ),
+            )
+            self.__send_message(user_id, message_user, keyboard)
+            self.__temp_data.pop(user_id)
+        else:
+            self.__send_message(user_id, *self.__cmd_answ[START_BUTTON_LABEL])
+            self.__send_message(user_id, *self.__cmd_answ[MENU_BUTTON_LABEL])
+
+    def __get_user_name(self, user_id):
+        """Метод получения данных пользователя по id."""
+        try:
+            user_info = self.__vk_session.method(
+                "users.get", {"user_ids": user_id}
+            )
+            if user_info[0]["first_name"] is not None:
+                return user_info[0]["first_name"]
+        except KeyError as error:
+            logger.error(f"Ошибка массива данных юзера: {error}")
+        except Exception as error:
+            logger.error(f"Ошибка получения данных юзера: {error}")
+        return user_id
 
     def __send_message(self, user_id, message_text, keyboard=None):
         """Метод отправки сообщений."""
@@ -259,8 +279,7 @@ class VKBot:
         self.__current_new_value = None
         if user_id_for_start is not None:
             self.__read_menu_handler(user_id_for_start, START_BUTTON_LABEL)
-            # После PR # 36 раскомментировать
-            # self.__is_current_command_handled = True
+            self.__is_current_command_handled = True
 
     def __check_for_edit_menu_events(self, user_id, text):
         """Метод проверяет, что сообщение от администратора группы.
@@ -357,10 +376,8 @@ class VKBot:
             self.__is_current_command_handled = True
         else:
             # При поступлении смешанных команд - сброс
-            # параметров редактирования.
+            # параметров редактирования, стартовое сообщение.
             self.__drop_edit_values(user_id)
-            # После PR 36 удалить self.__is_current_command_handled = False
-            self.__is_current_command_handled = False
 
     def __receive_new_value_handler(self, user_id, text):
         """Четвертая стадия - получено новое значение для пункта меню.
@@ -407,10 +424,8 @@ class VKBot:
         else:
             # Если ввод текста не соответствует текущей стадии режима
             # редактирования, или поступили смешанные команды, то
-            # сброс параметров редактирования. Команда не обработана.
+            # сброс параметров редактирования, стартовое сообщение.
             self.__drop_edit_values(user_id)
-            # После PR 36 удалить self.__is_current_command_handled = False
-            self.__is_current_command_handled = False
 
     def __cancel_from_edit_mode_handler(self, **kwargs):
         """Обработчик команды отмены редактирования.
@@ -429,8 +444,6 @@ class VKBot:
                 message_text=ABORT_MESSAGE,
             )
         self.__drop_edit_values(user_id)
-        # После PR 36 удалить self.__is_current_command_handled = True
-        self.__is_current_command_handled = True
 
     def __backward_in_edit_mode_handler(self, **kwargs):
         """Обработчик команды Назад в режиме редактирования.
@@ -524,9 +537,4 @@ class VKBot:
             # Обновляем словарь команд для режима чтения
             self.__cmd_answ = get_commands_dict(self.__menu)
             self.__is_current_command_handled = True
-        # После PR 36 блок else не нужен
-        else:
-            # Если поступили смешанные команды, то
-            # команда не обработана
-            self.__is_current_command_handled = False
         self.__drop_edit_values(user_id)
