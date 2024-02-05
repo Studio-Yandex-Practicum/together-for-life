@@ -15,10 +15,14 @@ from typing import Optional
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from constants import (
+    BACKWARD_BUTTON_LABEL,
     ENCODING,
+    MENU_BUTTON_LABEL,
     MENU_FILE_NAME,
     MENU_FOLDER,
     MAX_BUTTONS,
+    PREVIEW_MENU_MESSAGE,
+    START_BUTTON_LABEL,
     TO_ADMIN_DONAT,
     TO_USER_DONAT,
     TO_ADMIN_OTHER,
@@ -68,6 +72,16 @@ class MenuManager:
                 return row.get(self.key_message, None)
         return None
 
+    def get_label_by_index(self, index: str) -> Optional[str]:
+        """
+        Возвращает заголовок пункта меню по индексу.
+        Если нет пункта с нужным индекс, возвращает None.
+        """
+        for row in self.__menu:
+            if index.isdigit() and self.__menu.index(row) == int(index):
+                return row.get(self.key_label, None)
+        return None
+
     def get_message_by_index(self, label: str) -> Optional[str]:
         """
         Возвращает сообщение для заданной кнопки по индексу.
@@ -78,11 +92,13 @@ class MenuManager:
                 return row.get(self.key_message, None)
         return None
 
-    def get_preview_menu_labels(self) -> str:
-        """Возвращает строку с описанием меню для кнопок"""
+    def get_preview_menu_labels(self, start_index: int = 1) -> str:
+        """Возвращает строку с описанием меню для кнопок.
+        Не обязательный аргумент start_index = 1."""
         preview = ""
-        for label in self.get_menu_labels()[1::]:
+        for label in self.get_menu_labels()[start_index::]:
             preview += f"{self.get_menu_labels().index(label)}. {label}\n"
+        preview += PREVIEW_MENU_MESSAGE
         return preview
 
     def __write_file(self):
@@ -142,16 +158,25 @@ def collect_keyboard(
 
 def get_commands_dict(menu: MenuManager):
     """Функция получения словаря команд."""
-    keyboard_start = collect_keyboard(["Меню"])
+    keyboard_start = collect_keyboard([MENU_BUTTON_LABEL])
     keyboard_menu = collect_keyboard(
         [name for name in range(1, len(menu.get_menu_labels()))]
     )
-    keyboard_back = collect_keyboard(["Назад"])
+    keyboard_back = collect_keyboard([BACKWARD_BUTTON_LABEL])
     return dict(
         (
-            ("Начать", (menu.get_message_by_index("0"), keyboard_start)),
-            ("Меню", (menu.get_preview_menu_labels(), keyboard_menu)),
-            ("Назад", (menu.get_preview_menu_labels(), keyboard_menu)),
+            (
+                START_BUTTON_LABEL,
+                (menu.get_message_by_index("0"), keyboard_start),
+            ),
+            (
+                MENU_BUTTON_LABEL,
+                (menu.get_preview_menu_labels(), keyboard_menu),
+            ),
+            (
+                BACKWARD_BUTTON_LABEL,
+                (menu.get_preview_menu_labels(), keyboard_menu),
+            ),
             ("6_for_adm", ((TO_ADMIN_DONAT, TO_USER_DONAT), keyboard_back)),
             ("7_for_adm", ((TO_ADMIN_OTHER, TO_USER_OTHER), keyboard_back)),
         )
