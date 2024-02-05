@@ -142,6 +142,8 @@ class VKBot:
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
             self.__temp_data[user_id] = text + "_for_adm"
+        else:
+            self.__temp_data.pop(user_id, None)
 
     def __read_menu_handler(self, user_id, text):
         """Обработка команд для чтения меню."""
