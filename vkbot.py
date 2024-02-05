@@ -141,11 +141,22 @@ class VKBot:
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
-            self.__temp_data.setdefault(user_id, text + "_for_adm")
+            # В случае если, пользователь ввёл пункты 6 и 7 без ввода текста,
+            # устанавливаем ожидание сообщение по последнему такому пункту.
+            self.__temp_data[user_id] = text + "_for_adm"
 
     def __read_menu_handler(self, user_id, text):
         """Обработка команд для чтения меню."""
         if self.__cmd_answ.get(text) is not None:
+            # Если пришли команды Назад, Начать или Меню
+            if text in (
+                BACKWARD_BUTTON_LABEL,
+                START_BUTTON_LABEL,
+                MENU_BUTTON_LABEL,
+            ):
+                # стираем ожидание сообщений по п. 6 и 7,
+                # если такое было сохранено
+                self.__temp_data.pop(user_id, None)
             self.__send_message(user_id, *self.__cmd_answ.get(text))
         elif self.__menu.get_message_by_index(text) is not None:
             self.__send_message(
@@ -169,6 +180,8 @@ class VKBot:
         else:
             self.__send_message(user_id, *self.__cmd_answ[START_BUTTON_LABEL])
             self.__send_message(user_id, *self.__cmd_answ[MENU_BUTTON_LABEL])
+            # Стираем ожидание текста по п. 6 и 7, если такое было сохранено.
+            self.__temp_data.pop(user_id, None)
 
     def __get_user_name(self, user_id):
         """Метод получения данных пользователя по id."""
