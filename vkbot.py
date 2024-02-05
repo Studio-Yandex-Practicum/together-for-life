@@ -141,14 +141,14 @@ class VKBot:
     def __check_for_service_event(self, user_id, text):
         """Метод проверки события, и записи в словарь."""
         if text in ["6", "7"]:
-            self.__temp_data.setdefault(user_id, text + "_for_adm")
+            self.__temp_data[user_id] = text + "_for_adm"
 
     def __read_menu_handler(self, user_id, text):
         """Обработка команд для чтения меню."""
         if self.__cmd_answ.get(text) is not None:
             self.__send_message(user_id, *self.__cmd_answ.get(text))
-            if user_id in self.__temp_data:
-                self.__temp_data.pop(user_id)
+            # В случае смешанных команд
+            self.__temp_data.pop(user_id, None)
         elif self.__menu.get_message_by_index(text) is not None:
             self.__send_message(
                 user_id,
@@ -425,6 +425,8 @@ class VKBot:
             # Если ввод текста не соответствует текущей стадии режима
             # редактирования, или поступили смешанные команды, то
             # сброс параметров редактирования, команда не обработана.
+            if self.__menu_edit_mode:
+                self.__temp_data.pop(user_id, None)
             self.__drop_edit_values()
 
     def __cancel_from_edit_mode_handler(self, **kwargs):
