@@ -147,6 +147,8 @@ class VKBot:
         """Обработка команд для чтения меню."""
         if self.__cmd_answ.get(text) is not None:
             self.__send_message(user_id, *self.__cmd_answ.get(text))
+            if user_id in self.__temp_data:
+                self.__temp_data.pop(user_id)
         elif self.__menu.get_message_by_index(text) is not None:
             self.__send_message(
                 user_id,
