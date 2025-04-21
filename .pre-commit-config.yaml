@@ -22,4 +22,3 @@ repos:
   hooks:
     - id: ruff
     - id: ruff-format
-      args: ['--line-length', '79']
